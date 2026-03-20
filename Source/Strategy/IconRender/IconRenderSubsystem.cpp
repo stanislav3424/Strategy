@@ -19,12 +19,26 @@ void UIconRenderSubsystem::RequestIcon(AActor* Requester, TSubclassOf<AIconRende
 
 void UIconRenderSubsystem::Tick()
 {
-	for (auto& IconRenderInfosPair : IconRenderInfos)
-		for (auto& RenderClass : IconRenderInfosPair.Value.QueueRenderClasses)
-		{
-			ExecuteRender(IconRenderInfosPair.Key, RenderClass.Key);
-			return;
-		}
+    TSubclassOf<AIconRenderActor> SelectedIconRenderActorClass = nullptr;
+    TSubclassOf<AActor> SelectedRenderClass = nullptr;
+
+    for (auto& IconRenderInfosPair : IconRenderInfos)
+    {
+        for (auto& RenderClass : IconRenderInfosPair.Value.QueueRenderClasses)
+        {
+            SelectedIconRenderActorClass = IconRenderInfosPair.Key;
+            SelectedRenderClass = RenderClass.Key;
+            break;
+        }
+
+        if (SelectedIconRenderActorClass)
+            break;
+    }
+
+    if (!SelectedIconRenderActorClass)
+        return;
+
+    ExecuteRender(SelectedIconRenderActorClass, SelectedRenderClass);
 }
 
 void UIconRenderSubsystem::ExecuteRender(TSubclassOf<AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass)
