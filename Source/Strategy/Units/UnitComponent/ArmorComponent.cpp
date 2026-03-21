@@ -39,7 +39,9 @@ void UArmorComponent::ApplyDamageHealth(float Damage)
     BroadcastHealthChanged();
 
     if (CurrentHealth <= 0.f)
+    {
 
+    }
 }
 
 void UArmorComponent::ApplyDamageArmor(float Damage)
