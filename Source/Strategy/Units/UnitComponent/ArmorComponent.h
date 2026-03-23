@@ -9,7 +9,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, CurrentHealth, float, MaxHealth);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnArmorChanged, float, CurrentArmor, float, MaxArmor);
 
-UCLASS(ClassGroup = (UnitComponent), meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (UnitComponent))
 class STRATEGY_API UArmorComponent : public UActorComponent
 {
     GENERATED_BODY()
@@ -48,18 +48,18 @@ private:
     void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy,
         AActor* DamageCauser);
 
-    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    float MaxHealth;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SettingsArmor", meta = (AllowPrivateAccess = "true"))
+    float MaxHealth = 100.f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
     float CurrentHealth;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    float MaxArmorDurability;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SettingsArmor", meta = (AllowPrivateAccess = "true"))
+    float MaxArmorDurability = 0.f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
     float CurrentArmorDurability;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    float ArmorRating;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SettingsArmor", meta = (AllowPrivateAccess = "true"))
+    float ArmorRating = 0.f;
 };

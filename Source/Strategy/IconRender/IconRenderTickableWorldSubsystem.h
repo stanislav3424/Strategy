@@ -18,6 +18,10 @@ class STRATEGY_API UIconRenderTickableWorldSubsystem : public UTickableWorldSubs
 
 public:
     virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override
+    {
+        RETURN_QUICK_DECLARE_CYCLE_STAT(UIconRenderTickableWorldSubsystem, STATGROUP_Tickables);
+    };
 
 protected:
     virtual void OnWorldBeginPlay(UWorld& InWorld) override;

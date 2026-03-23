@@ -24,6 +24,8 @@ void UIconRenderTickableWorldSubsystem::Tick(float DeltaTime)
 
 void UIconRenderTickableWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
+    Super::OnWorldBeginPlay(InWorld);
+
     IconRenderSubsystem =
         UGameInstance::GetSubsystem<UIconRenderSubsystem>(InWorld.GetGameInstance());
 }

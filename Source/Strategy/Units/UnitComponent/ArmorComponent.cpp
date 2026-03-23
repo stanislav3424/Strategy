@@ -25,6 +25,22 @@ void UArmorComponent::BeginPlay()
 	}
 
 	Owner->OnTakeAnyDamage.AddDynamic(this, &UArmorComponent::OnTakeAnyDamage);
+
+    if (MaxHealth <= 0.f)
+    {
+        MaxHealth = 100.f;
+        UE_LOG(LogTemp, Warning, TEXT("UArmorComponent::BeginPlay - MaxHealth is non-positive for %s!"), *GetOwner()->GetName());
+    }
+    if (MaxArmorDurability < 0.f)
+    {
+        MaxArmorDurability = 0.f;
+        UE_LOG(LogTemp, Warning, TEXT("UArmorComponent::BeginPlay - MaxArmorDurability is negative for %s!"), *GetOwner()->GetName());
+    }
+    if (ArmorRating < 0.f)
+    {
+        ArmorRating = 0.f;
+        UE_LOG(LogTemp, Warning, TEXT("UArmorComponent::BeginPlay - ArmorRating is negative for %s!"), *GetOwner()->GetName());
+    }
 }
 
 void UArmorComponent::ApplyDamageHealth(float Damage)

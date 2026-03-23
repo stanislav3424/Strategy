@@ -25,7 +25,7 @@ struct FIconRenderInfo
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Debug")
-	AIconRenderActor* IconRenderActor;
+	AIconRenderActor* IconRenderActor = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Debug")
 	TMap<TSubclassOf<AActor>, UTexture*> CachedIcons;
