@@ -6,13 +6,6 @@
 #include "GameFramework/Pawn.h"
 #include "PawnUnit.generated.h"
 
-class USpawnComponent;
-class UTeamComponent;
-class UArmorComponent;
-class UBehaviorTreeComponent;
-class UBlackboardComponent;
-class UBehaviorTree;
-
 UCLASS()
 class STRATEGY_API APawnUnit : public APawn
 {
@@ -25,17 +18,11 @@ protected:
     virtual void BeginPlay() override;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    USpawnComponent* SpawnComponent;
+    class USpawnComponent* SpawnComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UTeamComponent* TeamComponent;
+    class UTeamComponent* TeamComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UArmorComponent* ArmorComponent;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UBehaviorTreeComponent* BehaviorTreeComponent;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UBlackboardComponent* BlackboardComponent;
+    class UArmorComponent* ArmorComponent;
 };
