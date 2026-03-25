@@ -6,23 +6,6 @@
 #include "GameFramework/Character.h"
 #include "CharacterUnit.generated.h"
 
-class USpawnComponent;
-class UTeamComponent;
-class UArmorComponent;
-class UBehaviorTreeComponent;
-class UBlackboardComponent;
-class UBehaviorTree;
-
-UENUM(BlueprintType)
-enum class EUnitCommand : uint8
-{
-    None,
-    Default,
-    AttackUnit,
-    MoveTo,
-    Assault,
-};
-
 UCLASS()
 class STRATEGY_API ACharacterUnit : public ACharacter
 {
@@ -31,37 +14,17 @@ class STRATEGY_API ACharacterUnit : public ACharacter
 public:
 	ACharacterUnit();
 
-    UFUNCTION(BlueprintCallable, Category = "Commands")
-    void CancelCommand();
-
-    UFUNCTION(BlueprintCallable, Category = "Commands")
-    void CommandAttackUnit(AActor* TargetUnit);
-
-    UFUNCTION(BlueprintCallable, Category = "Commands")
-    void CommandMoveTo(FVector const& Destination);
-
-    UFUNCTION(BlueprintCallable, Category = "Commands")
-    void CommandAssault(FVector const& Destination);
-
 protected:
-	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USpawnComponent* SpawnComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UTeamComponent* TeamComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UArmorComponent* ArmorComponent;
+    class USpawnComponent* SpawnComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UBehaviorTreeComponent* BehaviorTreeComponent;
+    class UTeamComponent* TeamComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UBlackboardComponent* BlackboardComponent;
+    class UArmorComponent* ArmorComponent;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
-    TMap<EUnitCommand, UBehaviorTree*> BehaviorTrees;
-
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    class UUnitCommandComponent* UnitCommandComponent;
 };
