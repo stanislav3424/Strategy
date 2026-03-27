@@ -16,6 +16,16 @@ public:
     FVector Vector = FVector::ZeroVector;
 };
 
+UCLASS(NotBlueprintable)
+class STRATEGY_API UActorContext : public UObject
+{
+    GENERATED_BODY()
+
+public:
+    UPROPERTY(BlueprintReadOnly, Category = "Debug")
+    AActor* Actor = nullptr;
+};
+
 UCLASS(Abstract, Blueprintable)
 class STRATEGY_API UCommandObject : public UObject
 {
@@ -24,12 +34,13 @@ class STRATEGY_API UCommandObject : public UObject
 public:
     void ExecuteCommand(AActor* Owner, UObject* Context = nullptr);
     void EndExecution();
+    static TArray<class UTurretCommandComponent*> GetChildTurretCommandComponents(AActor* Owner);
 
 protected:
     virtual void OnExecuteeCommand(AActor* Owner, UObject* Context, class UBlackboardComponent* BlackboardComponent) {};
-    virtual void OnEndExecution() {};
+    virtual void OnEndExecution(AActor* Owner) {};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debug")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BehaviorTree")
     class UBehaviorTree* BehaviorTreeToExecute;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug")
@@ -43,16 +54,14 @@ protected:
 };
 
 UCLASS(Abstract, Blueprintable)
-class STRATEGY_API UUnitDefaultCommand : public UCommandObject
-{
-    GENERATED_BODY()
-
-};
-
-UCLASS(Abstract, Blueprintable)
 class STRATEGY_API UUnitAttackUnitCommand : public UCommandObject
 {
     GENERATED_BODY()
+
+protected:
+    virtual void OnExecuteeCommand(
+        AActor* Owner, UObject* Context, class UBlackboardComponent* BlackboardComponent) override;
+    virtual void OnEndExecution(AActor* Owner) override;
 };
 
 UCLASS(Abstract, Blueprintable)
@@ -76,13 +85,11 @@ protected:
 };
 
 UCLASS(Abstract, Blueprintable)
-class STRATEGY_API UTurretDefaultCommand : public UCommandObject
-{
-    GENERATED_BODY()
-};
-
-UCLASS(Abstract, Blueprintable)
 class STRATEGY_API UTurretAttackUnitCommand : public UCommandObject
 {
     GENERATED_BODY()
+
+protected:
+    virtual void OnExecuteeCommand(
+        AActor* Owner, UObject* Context, class UBlackboardComponent* BlackboardComponent) override;
 };

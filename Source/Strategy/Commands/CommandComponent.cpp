@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Commands/CommandComponent.h"
-#include "Commands/CommandObject.h"
+#include "CommandComponent.h"
+#include "CommandObject.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 
 void UCommandComponent::BeginPlay()
@@ -30,9 +30,6 @@ bool UCommandComponent::IsCurrentCommand(TSubclassOf<UCommandObject> CommandClas
 void UCommandComponent::ExecuteCommand(UCommandObject* Command, UObject* Context)
 {
     if (!Command)
-        return;
-
-    if (IsCurrentCommand(Command->GetClass()))
         return;
 
     if (CurrentCommand)

@@ -4,15 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "ComponentInterface.h"
 #include "PawnUnit.generated.h"
 
 UCLASS()
-class STRATEGY_API APawnUnit : public APawn
+class STRATEGY_API APawnUnit : public APawn, public IComponentInterface
 {
 	GENERATED_BODY()
 
 public:
 	APawnUnit();
+
+    virtual class UCommandComponent* GetCommandComponent_Implementation() override;
+    virtual class USpawnComponent*   GetSpawnComponent_Implementation() override;
+    virtual class UTeamComponent*    GetTeamComponent_Implementation() override;
+    virtual class UArmorComponent*   GetArmorComponent_Implementation() override;
 
 protected:
     virtual void BeginPlay() override;
@@ -24,5 +30,5 @@ protected:
     class UTeamComponent* TeamComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    class UArmorComponent* ArmorComponent;
+    class UArmorComponent* ArmorComponent;	
 };

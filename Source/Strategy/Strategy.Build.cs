@@ -23,7 +23,9 @@ public class Strategy : ModuleRules
             "Strategy/Units",
             "Strategy/Units/UnitComponent",
             "Strategy/IconRender",
-            "Strategy/Team"
+            "Strategy/Team",
+            "Strategy/Commands",
+            "Strategy/UserInterface"
         });
 
         // Uncomment if you are using Slate UI
