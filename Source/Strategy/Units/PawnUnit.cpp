@@ -7,6 +7,9 @@
 
 APawnUnit::APawnUnit()
 {
+    auto RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
+    RootComponent = RootSceneComponent;
+
     SpawnComponent        = CreateDefaultSubobject<USpawnComponent>(TEXT("SpawnComponent"));
     TeamComponent         = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponent"));
     ArmorComponent        = CreateDefaultSubobject<UArmorComponent>(TEXT("ArmorComponent"));

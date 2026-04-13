@@ -33,13 +33,13 @@ protected:
     void OnSelectionCompleted(struct FInputActionValue const& InputAction);
     void OnCommand(struct FInputActionValue const& InputAction);
 
-    UPROPERTY(EditDefaultsOnly, Category = "Imput")
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     class UInputMappingContext* DefaultMappingContext;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Imput")
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     class UInputAction* SelectionAction;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Imput")
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     class UInputAction* CommandAction;
 
 private:

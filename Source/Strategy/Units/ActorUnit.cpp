@@ -8,8 +8,7 @@
 
 AActorUnit::AActorUnit()
 {
-    SpawnComponent       = CreateDefaultSubobject<USpawnComponent>(TEXT("SpawnComponent"));
-    TeamComponent        = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponent"));
-    ArmorComponent       = CreateDefaultSubobject<UArmorComponent>(TEXT("ArmorComponent"));
-
+    SpawnComponent = CreateDefaultSubobject<USpawnComponent>(TEXT("SpawnComponent"));
+    TeamComponent  = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponent"));
+    ArmorComponent = CreateDefaultSubobject<UArmorComponent>(TEXT("ArmorComponent"));
 }

@@ -25,6 +25,7 @@ public class Strategy : ModuleRules
             "Strategy/IconRender",
             "Strategy/Team",
             "Strategy/Commands",
+            "Strategy/GameMode",
             "Strategy/UserInterface"
         });
 
