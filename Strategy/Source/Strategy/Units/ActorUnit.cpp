@@ -13,23 +13,3 @@ AActorUnit::AActorUnit()
     ArmorComponent       = CreateDefaultSubobject<UArmorComponent>(TEXT("ArmorComponent"));
 
 }
-
-UCommandComponent* AActorUnit::GetCommandComponent_Implementation()
-{
-    return nullptr;
-}
-
-USpawnComponent* AActorUnit::GetSpawnComponent_Implementation()
-{
-    return SpawnComponent;
-}
-
-UTeamComponent* AActorUnit::GetTeamComponent_Implementation()
-{
-    return TeamComponent;
-}
-
-UArmorComponent* AActorUnit::GetArmorComponent_Implementation()
-{
-    return ArmorComponent;
-}

@@ -19,23 +19,3 @@ void APawnUnit::BeginPlay()
     Super::BeginPlay();
 
 }
-
-UCommandComponent* APawnUnit::GetCommandComponent_Implementation()
-{
-    return nullptr;
-}
-
-USpawnComponent* APawnUnit::GetSpawnComponent_Implementation()
-{
-    return SpawnComponent;
-}
-
-UTeamComponent* APawnUnit::GetTeamComponent_Implementation()
-{
-    return TeamComponent;
-}
-
-UArmorComponent* APawnUnit::GetArmorComponent_Implementation()
-{
-    return ArmorComponent;
-}

@@ -15,13 +15,17 @@ class STRATEGY_API UCommandComponent : public UActorComponent
     GENERATED_BODY()
 
 public:
+    UFUNCTION(BlueprintCallable)
+    static UCommandComponent* GetCommandComponent(AActor* Actor);
+
     UFUNCTION(BlueprintCallable, Category = "Commands")
-    void ExecuteCommand(UCommandObject* Command, UObject* Context = nullptr);
+    void ExecuteCommand(TSubclassOf<UCommandObject> CommandClass, FVector TargetLocation = FVector::ZeroVector, AActor* TargetActor = nullptr);
 
     UFUNCTION(BlueprintCallable, Category = "Commands")
     virtual void CancelCommand();
 
 protected:
+    void ExecuteCommand(UCommandObject* Command, FVector TargetLocation = FVector::ZeroVector, AActor* TargetActor = nullptr);
     virtual void BeginPlay() override;
     bool         IsCurrentCommand(TSubclassOf<UCommandObject> CommandClass) const;
 
@@ -42,7 +46,6 @@ class STRATEGY_API UTurretCommandComponent : public UCommandComponent
     GENERATED_BODY()
 
 public:
-
     UFUNCTION(BlueprintCallable, Category = "Commands")
     void CommandAttackUnit(AActor* TargetUnit);
 
@@ -59,7 +62,6 @@ class STRATEGY_API UUnitCommandComponent : public UCommandComponent
     GENERATED_BODY()
 
 public:
-
     UFUNCTION(BlueprintCallable, Category = "Commands")
     void CommandAttackUnit(AActor* TargetUnit);
 
@@ -71,7 +73,6 @@ public:
 
 protected:
     virtual void BeginPlay() override;
-
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Commands")
     TSubclassOf<UCommandObject> AttackCommand;

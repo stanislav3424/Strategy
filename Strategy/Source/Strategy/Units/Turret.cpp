@@ -7,8 +7,3 @@ ATurret::ATurret()
 {
     TurretCommandComponent = CreateDefaultSubobject<UTurretCommandComponent>(TEXT("TurretCommandComponent"));
 }
-
-UCommandComponent* ATurret::GetCommandComponent_Implementation()
-{
-    return TurretCommandComponent;
-}

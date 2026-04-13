@@ -17,8 +17,6 @@ class STRATEGY_API AFactoryUnit : public APawnUnit
 public:
     AFactoryUnit();
 
-    virtual class UUnitFactoryComponent* GetUnitFactoryComponent_Implementation() override;
-
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class UUnitFactoryComponent* UnitFactoryComponent;

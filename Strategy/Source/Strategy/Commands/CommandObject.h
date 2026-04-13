@@ -32,12 +32,13 @@ class STRATEGY_API UCommandObject : public UObject
     GENERATED_BODY()
 
 public:
-    void ExecuteCommand(AActor* Owner, UObject* Context = nullptr);
+    void ExecuteCommand(AActor* Owner, FVector TargetLocation = FVector::ZeroVector, AActor* TargetActor = nullptr);
     void EndExecution();
     static TArray<class UTurretCommandComponent*> GetChildTurretCommandComponents(AActor* Owner);
 
 protected:
-    virtual void OnExecuteeCommand(AActor* Owner, UObject* Context, class UBlackboardComponent* BlackboardComponent) {};
+    virtual void OnExecuteeCommand(AActor* Owner, FVector TargetLocation,
+        AActor* TargetActor, class UBlackboardComponent* BlackboardComponent) {};
     virtual void OnEndExecution(AActor* Owner) {};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BehaviorTree")
@@ -47,7 +48,10 @@ protected:
     AActor* Owner_Internal;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug")
-    UObject* Context_Internal;
+    FVector TargetLocation_Internal;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Debug")
+    AActor* TargetActor_Internal;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug")
     class UBlackboardComponent* BlackboardComponent_Internal;
@@ -59,8 +63,8 @@ class STRATEGY_API UUnitAttackUnitCommand : public UCommandObject
     GENERATED_BODY()
 
 protected:
-    virtual void OnExecuteeCommand(
-        AActor* Owner, UObject* Context, class UBlackboardComponent* BlackboardComponent) override;
+    virtual void OnExecuteeCommand(AActor* Owner, FVector TargetLocation,
+        AActor* TargetActor, class UBlackboardComponent* BlackboardComponent) override;
     virtual void OnEndExecution(AActor* Owner) override;
 };
 
@@ -70,8 +74,8 @@ class STRATEGY_API UUnitMoveToCommand : public UCommandObject
     GENERATED_BODY()
 
 protected:
-    virtual void OnExecuteeCommand(
-        AActor* Owner, UObject* Context, class UBlackboardComponent* BlackboardComponent) override;
+    virtual void OnExecuteeCommand(AActor* Owner, FVector TargetLocation,
+        AActor* TargetActor, class UBlackboardComponent* BlackboardComponent) override;
 };
 
 UCLASS(Abstract, Blueprintable)
@@ -80,8 +84,8 @@ class STRATEGY_API UUnitAssaultCommand : public UCommandObject
     GENERATED_BODY()
 
 protected:
-    virtual void OnExecuteeCommand(
-        AActor* Owner, UObject* Context, class UBlackboardComponent* BlackboardComponent) override;
+    virtual void OnExecuteeCommand(AActor* Owner, FVector TargetLocation,
+        AActor* TargetActor, class UBlackboardComponent* BlackboardComponent) override;
 };
 
 UCLASS(Abstract, Blueprintable)
@@ -91,5 +95,5 @@ class STRATEGY_API UTurretAttackUnitCommand : public UCommandObject
 
 protected:
     virtual void OnExecuteeCommand(
-        AActor* Owner, UObject* Context, class UBlackboardComponent* BlackboardComponent) override;
+        AActor* Owner, FVector TargetLocation, AActor* TargetActor, class UBlackboardComponent* BlackboardComponent) override;
 };

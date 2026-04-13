@@ -7,11 +7,12 @@
 #include "ComponentInterface.h"
 #include "CommandComponent.h"
 
-void UCommandObject::ExecuteCommand(AActor* Owner, UObject* Context)
+void UCommandObject::ExecuteCommand(AActor* Owner, FVector TargetLocation, AActor* TargetActor)
 {
     if (!BehaviorTreeToExecute)
     {
-        UE_LOG(LogTemp, Error, TEXT("UCommandObject::Execute - No BehaviorTreeToExecute set on Command %s!"), *GetName());
+        UE_LOG(
+            LogTemp, Error, TEXT("UCommandObject::Execute - No BehaviorTreeToExecute set on Command %s!"), *GetName());
         return;
     }
 
@@ -24,7 +25,8 @@ void UCommandObject::ExecuteCommand(AActor* Owner, UObject* Context)
     auto AIController = Cast<AAIController>(Owner->GetInstigatorController());
     if (!AIController)
     {
-        UE_LOG(LogTemp, Error, TEXT("UCommandObject::Execute - Owner %s does not have a valid AIController!"), *Owner->GetName());
+        UE_LOG(LogTemp, Error, TEXT("UCommandObject::Execute - Owner %s does not have a valid AIController!"),
+            *Owner->GetName());
         return;
     }
 
@@ -33,14 +35,16 @@ void UCommandObject::ExecuteCommand(AActor* Owner, UObject* Context)
     BlackboardComponent_Internal = AIController->GetBlackboardComponent();
     if (!BlackboardComponent_Internal)
     {
-        UE_LOG(LogTemp, Error, TEXT("UCommandObject::Execute - Owner %s does not have a BlackboardComponent!"), *Owner->GetName());
+        UE_LOG(LogTemp, Error, TEXT("UCommandObject::Execute - Owner %s does not have a BlackboardComponent!"),
+            *Owner->GetName());
         return;
     }
 
     Owner_Internal   = Owner;
-    Context_Internal = Context;
+    TargetLocation_Internal = TargetLocation;
+    TargetActor_Internal = TargetActor; 
 
-    OnExecuteeCommand(Owner, Context, BlackboardComponent_Internal);
+    OnExecuteeCommand(Owner, TargetLocation, TargetActor, BlackboardComponent_Internal);
 }
 
 void UCommandObject::EndExecution()
@@ -93,26 +97,24 @@ TArray<UTurretCommandComponent*> UCommandObject::GetChildTurretCommandComponents
 }
 
 void UUnitAttackUnitCommand::OnExecuteeCommand(
-    AActor* Owner, UObject* Context, UBlackboardComponent* BlackboardComponent)
+    AActor* Owner, FVector TargetLocation, AActor* TargetActor, UBlackboardComponent* BlackboardComponent)
 {
-    if (!Owner || !Context || !BlackboardComponent)
+    if (!Owner || !BlackboardComponent)
         return;
 
-    auto ActorContext = Cast<UActorContext>(Context);
-    if (!ActorContext)
+    if (!TargetActor)
     {
-        UE_LOG(LogTemp, Error,
-            TEXT("UUnitAttackUnitCommand::OnExecuteeCommand - Context is not of type UActorContext!"));
+        UE_LOG(LogTemp, Error, TEXT("UUnitAttackUnitCommand::OnExecuteeCommand - No TargetActor provided for AttackUnit command!"));
         return;
     }
 
-    BlackboardComponent->SetValueAsObject(TEXT("TargetActor"), ActorContext->Actor);
+    BlackboardComponent->SetValueAsObject(TEXT("TargetActor"), TargetActor);
 
     for (auto TurretCommandComponent : GetChildTurretCommandComponents(Owner))
     {
         if (!TurretCommandComponent)
             continue;
-        TurretCommandComponent->CommandAttackUnit(ActorContext->Actor);
+        TurretCommandComponent->CommandAttackUnit(TargetActor);
     }
 }
 
@@ -126,50 +128,33 @@ void UUnitAttackUnitCommand::OnEndExecution(AActor* Owner)
     }
 }
 
-void UUnitMoveToCommand::OnExecuteeCommand(AActor* Owner, UObject* Context, UBlackboardComponent* BlackboardComponent)
+void UUnitMoveToCommand::OnExecuteeCommand(AActor* Owner, FVector TargetLocation, AActor* TargetActor, UBlackboardComponent* BlackboardComponent)
 {
-    if (!Owner || !Context || !BlackboardComponent)
+    if (!Owner || !BlackboardComponent)
         return;
 
-    auto VectorContext = Cast<UVectorContext>(Context);
-    if (!VectorContext)
-    {
-        UE_LOG(
-            LogTemp, Error, TEXT("UUnitMoveToCommand::OnExecuteeCommand - Context is not of type UVectorContext!"));
-        return;
-    }
-
-    BlackboardComponent->SetValueAsVector(TEXT("TargetLocation"), VectorContext->Vector);
+    BlackboardComponent->SetValueAsVector(TEXT("TargetLocation"), TargetLocation);
 }
 
-void UUnitAssaultCommand::OnExecuteeCommand(AActor* Owner, UObject* Context, UBlackboardComponent* BlackboardComponent)
+void UUnitAssaultCommand::OnExecuteeCommand(AActor* Owner, FVector TargetLocation, AActor* TargetActor, UBlackboardComponent* BlackboardComponent)
 {
-    if (!Owner || !Context || !BlackboardComponent)
+    if (!Owner || !BlackboardComponent)
         return;
 
-    auto VectorContext = Cast<UVectorContext>(Context);
-    if (!VectorContext)
-    {
-        UE_LOG(
-            LogTemp, Error, TEXT("UUnitAssaultCommand::OnExecuteeCommand - Context is not of type UVectorContext!"));
-        return;
-    }
-
-    BlackboardComponent->SetValueAsVector(TEXT("TargetLocation"), VectorContext->Vector);
+    BlackboardComponent->SetValueAsVector(TEXT("TargetLocation"), TargetLocation);
 }
 
 void UTurretAttackUnitCommand::OnExecuteeCommand(
-    AActor* Owner, UObject* Context, UBlackboardComponent* BlackboardComponent)
+    AActor* Owner, FVector TargetLocation, AActor* TargetActor, UBlackboardComponent* BlackboardComponent)
 {
-    if (!Owner || !Context || !BlackboardComponent)
+    if (!Owner || BlackboardComponent)
         return;
 
-    auto ActorContext = Cast<UActorContext>(Context);
-    if (!ActorContext)
+    if (!TargetActor)
     {
-        UE_LOG(LogTemp, Error, TEXT("UTurretAttackUnitCommand::OnExecuteeCommand - Context is not of type UActorContext!"));
+        UE_LOG(LogTemp, Error, TEXT("UTurretAttackUnitCommand::OnExecuteeCommand - No TargetActor provided for AttackUnit command!"));
         return;
     }
 
-    BlackboardComponent->SetValueAsObject(TEXT("TargetActor"), ActorContext->Actor);
+    BlackboardComponent->SetValueAsObject(TEXT("TargetActor"), TargetActor);
 }

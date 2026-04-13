@@ -16,23 +16,3 @@ ACharacterUnit::ACharacterUnit()
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
-
-UCommandComponent* ACharacterUnit::GetCommandComponent_Implementation()
-{
-    return UnitCommandComponent;
-}
-
-USpawnComponent* ACharacterUnit::GetSpawnComponent_Implementation()
-{
-    return SpawnComponent;
-}
-
-UTeamComponent* ACharacterUnit::GetTeamComponent_Implementation()
-{
-    return TeamComponent;
-}
-
-UArmorComponent* ACharacterUnit::GetArmorComponent_Implementation()
-{
-    return ArmorComponent;
-}

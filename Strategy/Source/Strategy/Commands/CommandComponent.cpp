@@ -3,23 +3,17 @@
 #include "CommandComponent.h"
 #include "CommandObject.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
+#include "CheckFieldMacros.h"
 
 void UCommandComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    auto Owner = GetOwner();
-    if (!Owner)
-        return;
-
-    if (!DefaultCommand)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UCommandComponent::BeginPlay - No DefaultCommand set on CommandComponent of Owner %s!"),
-            *Owner->GetName());
-        return;
-    }
+    CHECK_FIELD_RETURN(LogTemp, DefaultCommand);
 
     AvailableCommands.Add(DefaultCommand);
+
+    CancelCommand();
 }
 
 bool UCommandComponent::IsCurrentCommand(TSubclassOf<UCommandObject> CommandClass) const
@@ -27,7 +21,7 @@ bool UCommandComponent::IsCurrentCommand(TSubclassOf<UCommandObject> CommandClas
     return CurrentCommand ? CurrentCommand->IsA(CommandClass) : false;
 }
 
-void UCommandComponent::ExecuteCommand(UCommandObject* Command, UObject* Context)
+void UCommandComponent::ExecuteCommand(UCommandObject* Command, FVector TargetLocation, AActor* TargetActor)
 {
     if (!Command)
         return;
@@ -39,7 +33,34 @@ void UCommandComponent::ExecuteCommand(UCommandObject* Command, UObject* Context
     if (!CurrentCommand)
         return;
 
-    CurrentCommand->ExecuteCommand(GetOwner(), Context);
+    CurrentCommand->ExecuteCommand(GetOwner(), TargetLocation, TargetActor);
+}
+
+UCommandComponent* UCommandComponent::GetCommandComponent(AActor* Actor)
+{
+    if (!Actor)
+        return nullptr;
+
+    if (auto Component = Actor->FindComponentByClass<UCommandComponent>())
+        return Component;
+
+    UE_LOG(LogTemp, Error, TEXT("UCommandComponent::GetCommandComponent - Actor %s does not have a CommandComponent!"),
+        *Actor->GetName());
+
+    return nullptr;
+}
+
+void UCommandComponent::ExecuteCommand(
+    TSubclassOf<UCommandObject> CommandClass, FVector TargetLocation, AActor* TargetActor)
+{
+    if (!AvailableCommands.Contains(CommandClass))
+        return;
+
+    auto Command = NewObject<UCommandObject>(this, CommandClass);
+    if (!Command)
+        return;
+    
+    ExecuteCommand(Command, TargetLocation, TargetActor);
 }
 
 void UCommandComponent::CancelCommand()
@@ -47,11 +68,7 @@ void UCommandComponent::CancelCommand()
     if (!DefaultCommand)
         return;
 
-    auto Command = NewObject<UCommandObject>(this, DefaultCommand);
-    if (!Command)
-        return;
-
-    ExecuteCommand(Command);
+    ExecuteCommand(DefaultCommand);
 }
 
 void UTurretCommandComponent::CommandAttackUnit(AActor* TargetUnit)
@@ -59,23 +76,14 @@ void UTurretCommandComponent::CommandAttackUnit(AActor* TargetUnit)
     if (!AttackCommand)
         return;
 
-    auto Command = NewObject<UCommandObject>(this, AttackCommand);
-    if (!Command)
-        return;
-
-    ExecuteCommand(Command);
+    ExecuteCommand(DefaultCommand, FVector::ZeroVector, nullptr);
 }
 
 void UTurretCommandComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!AttackCommand)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UTurretCommandComponent::BeginPlay - No AttackCommand set on TurretCommandComponent of Owner %s!"),
-            *GetOwner()->GetName());
-        return;
-    }
+    CHECK_FIELD_RETURN(LogTemp, AttackCommand);
    
     AvailableCommands.Add(AttackCommand);
 
@@ -87,11 +95,7 @@ void UUnitCommandComponent::CommandAttackUnit(AActor* TargetUnit)
     if (!AttackCommand)
         return;
 
-    auto Command = NewObject<UCommandObject>(this, AttackCommand);
-    if (!Command)
-        return;
-
-    ExecuteCommand(Command);
+    ExecuteCommand(AttackCommand, FVector::ZeroVector, TargetUnit);
 }
 
 void UUnitCommandComponent::CommandMoveTo(FVector const& Destination)
@@ -99,17 +103,7 @@ void UUnitCommandComponent::CommandMoveTo(FVector const& Destination)
     if (!MoveToCommand)
         return;
 
-    auto Command = NewObject<UCommandObject>(this, MoveToCommand);
-    if (!Command)
-        return;
-
-    auto Context = NewObject<UVectorContext>(Command);
-    if (!Context)
-        return;
-
-    Context->Vector = Destination;
-
-    ExecuteCommand(Command, Context);
+    ExecuteCommand(MoveToCommand, Destination);
 }
 
 void UUnitCommandComponent::CommandAssault(FVector const& Destination)
@@ -117,43 +111,16 @@ void UUnitCommandComponent::CommandAssault(FVector const& Destination)
     if (!AssaultCommand)
         return;
 
-    auto Command = NewObject<UCommandObject>(this, AssaultCommand);
-    if (!Command)
-        return;
-
-    auto Context = NewObject<UVectorContext>(Command);
-    if (!Context)
-        return;
-
-    Context->Vector = Destination;
-
-    ExecuteCommand(Command, Context);
+    ExecuteCommand(AssaultCommand, Destination);
 }
 
 void UUnitCommandComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!AttackCommand)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UUnitCommandComponent::BeginPlay - No AttackCommand set on UnitCommandComponent of Owner %s!"),
-            *GetOwner()->GetName());
-        return;
-    }
-
-    if (!MoveToCommand)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UUnitCommandComponent::BeginPlay - No MoveToCommand set on UnitCommandComponent of Owner %s!"),
-            *GetOwner()->GetName());
-        return;
-    }
-
-    if (!AssaultCommand)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UUnitCommandComponent::BeginPlay - No AssaultCommand set on UnitCommandComponent of Owner %s!"),
-            *GetOwner()->GetName());
-        return;
-    }
+    CHECK_FIELD_RETURN(LogTemp, AttackCommand);
+    CHECK_FIELD_RETURN(LogTemp, MoveToCommand);
+    CHECK_FIELD_RETURN(LogTemp, AssaultCommand);
 
     AvailableCommands.Add(AttackCommand);
     AvailableCommands.Add(MoveToCommand);

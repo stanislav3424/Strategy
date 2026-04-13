@@ -59,3 +59,27 @@ void UTeamSubsystem::UnregisterTeam(UTeamComponent* TeamComponent)
 
     TeamComponent->TeamID = INDEX_NONE;
 }
+
+TArray<AActor*> UTeamSubsystem::GetActorsInTeam(int32 TeamID, TArray<AActor*> Actors)
+{
+    TArray<AActor*> Restult;
+    Restult.Reserve(Actors.Num());
+
+    for (auto Actor : Actors)
+    {
+        if (!Actor)
+            continue;
+        auto TeamComponent = Actor->FindComponentByClass<UTeamComponent>();
+        if (!TeamComponent)
+            continue;
+        if (TeamComponent->GetTeamID() == TeamID)
+            Restult.Add(Actor);
+    }
+
+    return Restult;
+}
+
+int32 UTeamSubsystem::GetPlayerTeamID()
+{
+    return 1;
+}

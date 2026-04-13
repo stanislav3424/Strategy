@@ -13,10 +13,10 @@ public class Strategy : ModuleRules
             "CoreUObject", 
             "Engine", 
             "InputCore",
-            "AIModule"
+            "AIModule",
+            "UMG",
+            "EnhancedInput"
         });
-
-		PrivateDependencyModuleNames.AddRange(new string[] { });
 
         PublicIncludePaths.AddRange(new string[] { 
             "Strategy",
@@ -29,7 +29,7 @@ public class Strategy : ModuleRules
         });
 
         // Uncomment if you are using Slate UI
-        // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+        PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 
         // Uncomment if you are using online features
         // PrivateDependencyModuleNames.Add("OnlineSubsystem");

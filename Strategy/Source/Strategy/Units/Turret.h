@@ -17,8 +17,6 @@ class STRATEGY_API ATurret : public APawnUnit
 public:
     ATurret();
 
-    virtual class UCommandComponent* GetCommandComponent_Implementation() override;
-
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class UTurretCommandComponent* TurretCommandComponent;

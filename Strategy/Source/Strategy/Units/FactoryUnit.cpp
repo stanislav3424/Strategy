@@ -7,8 +7,3 @@ AFactoryUnit::AFactoryUnit()
 {
     UnitFactoryComponent = CreateDefaultSubobject<UUnitFactoryComponent>(TEXT("UnitFactoryComponent"));
 }
-
-UUnitFactoryComponent* AFactoryUnit::GetUnitFactoryComponent_Implementation()
-{
-    return UnitFactoryComponent;
-}

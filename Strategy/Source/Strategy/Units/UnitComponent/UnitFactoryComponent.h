@@ -8,8 +8,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQueueChanged);
 
-class USphereComponent;
-
 UCLASS(ClassGroup = (UnitComponent))
 class STRATEGY_API UUnitFactoryComponent : public USceneComponent
 {
@@ -39,10 +37,10 @@ protected:
     TArray<TSubclassOf<AActor>> const& GetQueue() const { return QueueSpawnUnitClasses; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Instanced, Category = "Unit Factory")
-	USphereComponent* SpawnPoint;
+    class USphereComponent* SpawnPoint;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Instanced, Category = "Unit Factory")
-    USphereComponent* MovePoint;
+    class USphereComponent* MovePoint;
 
 	UPROPERTY(BlueprintAssignable)
     FOnQueueChanged OnQueueChanged;
