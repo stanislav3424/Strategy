@@ -30,18 +30,30 @@ void UTeamComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (TeamID <= 0)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UTeamComponent::BeginPlay - TeamID is not set for %s"), *GetOwner()->GetName());
-        TeamID = INDEX_NONE;
-        return;
-    }
-
-    auto TeamSubsystem = UWorld::GetSubsystem<UTeamSubsystem>(GetWorld());
-    if (!TeamSubsystem)
+    auto World = GetWorld();
+    if (!World)
         return;
 
-    int32 InitTeamID = TeamID;
-    TeamID = INDEX_NONE;
-    TeamSubsystem->RegisterTeam(this, InitTeamID);
+    World->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda(
+        [this]()
+        {
+            if (!IsValid(GetOwner()))
+                return;
+
+            if (TeamID <= 0)
+            {
+                UE_LOG(LogTemp, Error, TEXT("UTeamComponent::BeginPlay - TeamID is not set for %s"),
+                    *GetOwner()->GetName());
+                TeamID = INDEX_NONE;
+                return;
+            }
+
+            auto TeamSubsystem = UWorld::GetSubsystem<UTeamSubsystem>(GetWorld());
+            if (!TeamSubsystem)
+                return;
+
+            int32 InitTeamID = TeamID;
+            TeamID           = INDEX_NONE;
+            TeamSubsystem->RegisterTeam(this, InitTeamID);
+        }));
 }

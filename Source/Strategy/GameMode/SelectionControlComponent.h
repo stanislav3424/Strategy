@@ -6,22 +6,30 @@
 #include "GameMode/BaseControlComponent.h"
 #include "SelectionControlComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FUpdateSelectedActors, TArray<AActor*>, SelectedActors, TArray<AActor*>,
+    ActorsToDeselect, TArray<AActor*>, ActorsToSelect);
+
 UCLASS(ClassGroup = (ControlComponent))
 class STRATEGY_API USelectionControlComponent : public UBaseControlComponent
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
- public:
+public:
+    USelectionControlComponent();
+
     bool    IsSelection() const { return bIsSelection; }
     FVector GetStartSelectionLocation() const { return StartSelectionLocation; }
     FVector GetEndSelectionLocation() const { return EndSelectionLocation; }
     void    UpdateSelectionActors(TArray<AActor*> const& NewSelectedActors);
     AActor* GetActorUnderMouseCursor() const;
-    FVector GetMouseWorldLocation() const;
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+    UPROPERTY(BlueprintAssignable)
+    FUpdateSelectedActors OnUpdateSelectedActors;
 
 protected:
     virtual void OnSetupInputComponent(UEnhancedInputComponent* InputComponent) override;
+    virtual void OnDeactivateInput() override;
 
     void OnSelectionStarted(struct FInputActionValue const& InputAction);
     void OnSelectionCompleted(struct FInputActionValue const& InputAction);
@@ -54,4 +62,5 @@ private:
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
     TSubclassOf<class UCommandObject> CurrentCommand;
+
 };

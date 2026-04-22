@@ -7,90 +7,94 @@
 #include "EnhancedInputSubsystems.h"
 #include "CheckFieldMacros.h"
 #include "CommandComponent.h"
+#include "SelectionControlComponent.h"
+#include "BuildControlComponent.h"
 
 AGamePlayerController::AGamePlayerController()
 {
     bShowMouseCursor = true;
-}
 
-void AGamePlayerController::UpdateSelectionActors(TArray<AActor*> const& NewSelectedActors)
-{
-    TSet<AActor*> NewSelectedActorsSet;
-    NewSelectedActorsSet.Append(UTeamSubsystem::GetActorsInTeam(UTeamSubsystem::GetPlayerTeamID(), NewSelectedActors));
+    SelectionControlComponent = CreateDefaultSubobject<USelectionControlComponent>(TEXT("SelectionControlComponent"));
+    BuildControlComponent = CreateDefaultSubobject<UBuildControlComponent>(TEXT("BuildControlComponent"));
 
-    auto ActorsToDeselect = SelectedActors.Difference(NewSelectedActorsSet);
-    auto ActorsToSelect   = NewSelectedActorsSet.Difference(SelectedActors);
-
-    if (ActorsToDeselect.IsEmpty() && ActorsToSelect.IsEmpty())
-        return;
-
-    for (auto Actor : ActorsToDeselect)
-    {
-        USelectionComponent::SetSelected(Actor, false);
-    }
-
-    for (auto Actor : ActorsToSelect)
-    {
-        USelectionComponent::SetSelected(Actor, true);
-    }
-
-    SelectedActors = NewSelectedActorsSet;
-}
-
-AActor* AGamePlayerController::GetActorUnderMouseCursor() const
-{
-    FHitResult HitResult;
-    GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, HitResult);
-    return HitResult.GetActor();
-}
-
-FVector AGamePlayerController::GetMouseWorldLocation() const
-{
-    FHitResult HitResult;
-    if (GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, HitResult))
-        return HitResult.Location;
-    if (DeprojectMousePositionToWorld(HitResult.Location, HitResult.ImpactNormal))
-        return HitResult.Location;
-
-    return HitResult.Location;
 }
 
 void AGamePlayerController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-    EndSelectionLocation = GetMouseWorldLocation();
+}
 
-    if (bIsDetectSelection)
-    {
-        FVector2D ScreenStart;
-        ProjectWorldLocationToScreen(StartSelectionLocation, ScreenStart);
-        FVector2D ScreenEnd;
-        ProjectWorldLocationToScreen(EndSelectionLocation, ScreenEnd);
+void AGamePlayerController::SetSelectionControl()
+{
+    if (CurrentControlComponent == SelectionControlComponent)
+        return;
 
-        if (FVector2D::DistSquared(ScreenStart, ScreenEnd) > DistanceThreshold * DistanceThreshold)
-        {
-            bIsSelection       = true;
-            bIsDetectSelection = false;
-        }
-    }
+    if (CurrentControlComponent)
+        CurrentControlComponent->DeactivateInput();
+
+    CurrentControlComponent = SelectionControlComponent;
+    if (CurrentControlComponent)
+        CurrentControlComponent->ActivateInput();
+
+    BroadcastSwitchControlComponent();
+}
+
+void AGamePlayerController::SetBuildControl()
+{
+    if (CurrentControlComponent == BuildControlComponent)
+        return;
+
+    if (CurrentControlComponent)
+        CurrentControlComponent->DeactivateInput();
+
+    CurrentControlComponent = BuildControlComponent;
+    if (CurrentControlComponent)
+        CurrentControlComponent->ActivateInput();
+
+    BroadcastSwitchControlComponent();
+}
+
+void AGamePlayerController::SwitchControl()
+{
+    // Temporary
+    if (CurrentControlComponent == BuildControlComponent)
+        SetSelectionControl();
+    else
+        SetBuildControl();
+
+    BroadcastSwitchControlComponent();
+}
+
+FVector AGamePlayerController::GetMouseWorldLocation(APlayerController* PlayerController)
+{
+    FHitResult HitResult;
+    if (!PlayerController)
+        return FVector::ZeroVector;
+    if (PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, HitResult))
+        return HitResult.Location;
+    if (PlayerController->DeprojectMousePositionToWorld(HitResult.Location, HitResult.ImpactNormal))
+        return HitResult.Location;
+
+    return FVector::ZeroVector;
+}
+
+void AGamePlayerController::BroadcastSwitchControlComponent()
+{
+    OnSwitchControlComponent.Broadcast(CurrentControlComponent);
 }
 
 void AGamePlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
-    CHECK_FIELD_RETURN(LogTemp, DefaultMappingContext);
+    SetSelectionControl();
 
     auto LocalPlayer = GetLocalPlayer();
-    if (!LocalPlayer)
-        return;
-
+    CHECK_FIELD_RETURN(LogTemp, LocalPlayer);
     auto EnhancedInputLocalPlayerSubsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-    if (!EnhancedInputLocalPlayerSubsystem)
-        return;
-
-    EnhancedInputLocalPlayerSubsystem->AddMappingContext(DefaultMappingContext, 0);
+    CHECK_FIELD_RETURN(LogTemp, EnhancedInputLocalPlayerSubsystem);
+    EnhancedInputLocalPlayerSubsystem->AddMappingContext(DefaultInputMappingContext, 0);
 }
 
 void AGamePlayerController::SetupInputComponent()
@@ -101,52 +105,16 @@ void AGamePlayerController::SetupInputComponent()
     if (!EnhancedInputComponent)
         return;
 
-    CHECK_FIELD_RETURN(LogTemp, SelectionAction);
-    EnhancedInputComponent->BindAction(
-        SelectionAction, ETriggerEvent::Started, this, &AGamePlayerController::OnSelectionStarted);
-    EnhancedInputComponent->BindAction(
-        SelectionAction, ETriggerEvent::Completed, this, &AGamePlayerController::OnSelectionCompleted);
+    CHECK_FIELD_RETURN(LogTemp, SelectionControlComponent);
+    SelectionControlComponent->SetupInputComponent(EnhancedInputComponent);
+    CHECK_FIELD_RETURN(LogTemp, BuildControlComponent);
+    BuildControlComponent->SetupInputComponent(EnhancedInputComponent);
 
-
-    CHECK_FIELD_RETURN(LogTemp, CommandAction);
     EnhancedInputComponent->BindAction(
-        CommandAction, ETriggerEvent::Completed, this, &AGamePlayerController::OnCommand);
+        SwitchControlAction, ETriggerEvent::Started, this, &AGamePlayerController::OnSwitchControl);
 }
 
-void AGamePlayerController::OnSelectionStarted(FInputActionValue const& InputAction)
+void AGamePlayerController::OnSwitchControl(FInputActionValue const& InputAction)
 {
-    bIsSelection       = false;
-    bIsDetectSelection = true;
-
-    StartSelectionLocation = GetMouseWorldLocation();
-    EndSelectionLocation   = StartSelectionLocation;
-}
-
-void AGamePlayerController::OnSelectionCompleted(FInputActionValue const& InputAction)
-{
-    if (!bIsSelection && bIsDetectSelection)
-    {
-        TArray<AActor*> NewSelectedActors;
-        NewSelectedActors.Add(GetActorUnderMouseCursor());
-        UpdateSelectionActors(NewSelectedActors);
-    }
-
-    bIsSelection       = false;
-    bIsDetectSelection = false;
-
-}
-
-void AGamePlayerController::OnCommand(FInputActionValue const& InputAction)
-{
-    if (!CurrentCommand)
-        return;
-
-    FHitResult HitResult;
-    GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, HitResult);
-    if (!HitResult.bBlockingHit)
-        return;
-
-    for (auto Actor : SelectedActors)
-        if (auto CommandComponent = UCommandComponent::GetCommandComponent(Actor))
-            CommandComponent->ExecuteCommand(CurrentCommand, HitResult.Location, HitResult.GetActor());
+    SwitchControl();
 }

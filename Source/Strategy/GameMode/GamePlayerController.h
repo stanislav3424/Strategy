@@ -6,6 +6,9 @@
 #include "GameFramework/PlayerController.h"
 #include "GamePlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
+    FSwitchControlComponent, class UBaseControlComponent*, CurrentControlComponent);
+
 /**
  *
  */
@@ -17,50 +20,37 @@ class STRATEGY_API AGamePlayerController : public APlayerController
 public:
     AGamePlayerController();
 
-    bool         IsSelection() const { return bIsSelection; }
-    FVector      GetStartSelectionLocation() const { return StartSelectionLocation; }
-    FVector      GetEndSelectionLocation() const { return EndSelectionLocation; }
-    void         UpdateSelectionActors(TArray<AActor*> const& NewSelectedActors);
-    AActor*      GetActorUnderMouseCursor() const;
-    FVector      GetMouseWorldLocation() const;
     virtual void Tick(float DeltaSeconds) override;
+    void         SetSelectionControl();
+    void         SetBuildControl();
+    void         SwitchControl();
+
+    static FVector GetMouseWorldLocation(APlayerController* PlayerController);
+
+    UPROPERTY(BlueprintAssignable)
+    FSwitchControlComponent OnSwitchControlComponent;
+
+    void BroadcastSwitchControlComponent();
 
 protected:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
 
-    void OnSelectionStarted(struct FInputActionValue const& InputAction);
-    void OnSelectionCompleted(struct FInputActionValue const& InputAction);
-    void OnCommand(struct FInputActionValue const& InputAction);
+    void OnSwitchControl(struct FInputActionValue const& InputAction);
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    class USelectionControlComponent* SelectionControlComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    class UBuildControlComponent* BuildControlComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    class UInputMappingContext* DefaultMappingContext;
+    class UInputMappingContext* DefaultInputMappingContext;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    class UInputAction* SelectionAction;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Input")
-    class UInputAction* CommandAction;
+    class UInputAction* SwitchControlAction;
 
 private:
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    bool bIsSelection = false;
-
-    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    bool bIsDetectSelection = false;
-
-    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    FVector StartSelectionLocation = FVector::ZeroVector;
-
-    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    FVector EndSelectionLocation = FVector::ZeroVector;
-
-    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    TSet<AActor*> SelectedActors;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    float DistanceThreshold = 25.f;
-
-    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    TSubclassOf<class UCommandObject> CurrentCommand;
+    class UBaseControlComponent* CurrentControlComponent;
 };

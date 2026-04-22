@@ -26,16 +26,14 @@ void UBaseControlComponent::DeactivateInput()
 void UBaseControlComponent::SetupInputComponent(UEnhancedInputComponent* InputComponent)
 {
     auto World = GetWorld();
-    if (!World)
-        return;
+    CHECK_FIELD_RETURN(LogTemp, World);
     auto LocalPlayer = World->GetFirstLocalPlayerFromController();
-    if (!LocalPlayer)
-        return;
+    CHECK_FIELD_RETURN(LogTemp, LocalPlayer);
     EnhancedInputLocalPlayerSubsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
     CHECK_FIELD(LogTemp, EnhancedInputLocalPlayerSubsystem);
 
     PlayerController = Cast<APlayerController>(GetOwner());
-
+    CHECK_FIELD(LogTemp, PlayerController);
     OnSetupInputComponent(InputComponent);
 }
 

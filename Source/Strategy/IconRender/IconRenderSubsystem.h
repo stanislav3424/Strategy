@@ -8,15 +8,13 @@
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnIconReady, UTexture*, Icon);
 
-class AIconRenderActor;
-
 USTRUCT(BlueprintType)
 struct FPendingCallbacks
 {
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Debug")
-	TMap<AActor*, FOnIconReady> Callbacks;
+	TMap<UObject*, FOnIconReady> Callbacks;
 };
 
 USTRUCT(BlueprintType)
@@ -25,7 +23,7 @@ struct FIconRenderInfo
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Debug")
-	AIconRenderActor* IconRenderActor = nullptr;
+    class AIconRenderActor* IconRenderActor = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Debug")
 	TMap<TSubclassOf<AActor>, UTexture*> CachedIcons;
@@ -42,16 +40,20 @@ class STRATEGY_API UIconRenderSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
+	friend class UIconRenderTickableWorldSubsystem;
+
 public:
 	UFUNCTION(BlueprintCallable)
-	void RequestIcon(AActor* Requester,  TSubclassOf<AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass, FOnIconReady Callback);
+    void RequestIcon(UObject* Requester, TSubclassOf<class AIconRenderActor> IconRenderActorClass,
+        TSubclassOf<AActor> RenderClass, FOnIconReady Callback);
 
 private:
 	void Tick();
-	void ExecuteRender(TSubclassOf<AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass);
-	void AddIcon(TSubclassOf<AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass, UTexture* Icon);
+    void ExecuteRender(TSubclassOf<class AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass);
+    void AddIcon(
+        TSubclassOf<class AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass, UTexture* Icon);
 
 	UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-	TMap<TSubclassOf<AIconRenderActor>, FIconRenderInfo> IconRenderInfos;
+    TMap<TSubclassOf<class AIconRenderActor>, FIconRenderInfo> IconRenderInfos;
 
 };

@@ -4,7 +4,7 @@
 #include "IconRenderActor.h"
 #include "Engine/TextureRenderTarget2D.h"
 
-void UIconRenderSubsystem::RequestIcon(AActor* Requester, TSubclassOf<AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass, FOnIconReady Callback)
+void UIconRenderSubsystem::RequestIcon(UObject* Requester, TSubclassOf<AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass, FOnIconReady Callback)
 {
     auto& IconRenderInfo = IconRenderInfos.FindOrAdd(IconRenderActorClass);
 
@@ -46,8 +46,12 @@ void UIconRenderSubsystem::ExecuteRender(TSubclassOf<AIconRenderActor> IconRende
 	auto& IconRenderInfo = IconRenderInfos.FindOrAdd(IconRenderActorClass);
 	if (!IsValid(IconRenderInfo.IconRenderActor))
 	{
-		if (auto World = GetWorld())
-			World->SpawnActor(IconRenderActorClass);	
+        if (auto World = GetWorld())
+        {
+            FActorSpawnParameters SpawnParams;
+            SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+            IconRenderInfo.IconRenderActor             = World->SpawnActor<AIconRenderActor>(IconRenderActorClass, SpawnParams);	
+        }
 		return;
 	}
 
@@ -57,14 +61,24 @@ void UIconRenderSubsystem::ExecuteRender(TSubclassOf<AIconRenderActor> IconRende
 
 	RenderTarget->InitAutoFormat(256, 256);
 
-	if(IconRenderInfo.IconRenderActor->ExecuteRender(RenderClass, RenderTarget))
+	if (IsValid(IconRenderInfo.IconRenderActor) && IconRenderInfo.IconRenderActor->ExecuteRender(RenderClass, RenderTarget))
+    {
 		AddIcon(IconRenderActorClass, RenderClass, RenderTarget);
+    }
 }
 
 void UIconRenderSubsystem::AddIcon(TSubclassOf<AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass, UTexture* Icon)
 {
 	auto& IconRenderInfo = IconRenderInfos.FindOrAdd(IconRenderActorClass);
 
-	IconRenderInfo.QueueRenderClasses.Remove(RenderClass);
 	IconRenderInfo.CachedIcons.Add(RenderClass, Icon);
+
+    auto Callbacks = IconRenderInfo.QueueRenderClasses.Find(RenderClass);
+    for (auto& Callback : Callbacks->Callbacks)
+    {
+        Callback.Value.ExecuteIfBound(Icon);
+    }
+
+
+	IconRenderInfo.QueueRenderClasses.Remove(RenderClass);
 }

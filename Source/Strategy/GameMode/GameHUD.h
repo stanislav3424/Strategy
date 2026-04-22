@@ -27,4 +27,7 @@ private:
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
     class AGamePlayerController* PlayerController;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
+    class USelectionControlComponent* SelectionControlComponent;
 };

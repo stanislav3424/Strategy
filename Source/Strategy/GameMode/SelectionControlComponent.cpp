@@ -6,6 +6,12 @@
 #include "SelectionComponent.h"
 #include "CheckFieldMacros.h"
 #include "EnhancedInputComponent.h"
+#include "GamePlayerController.h"
+
+USelectionControlComponent::USelectionControlComponent()
+{
+    PrimaryComponentTick.bCanEverTick = true;
+}
 
 void USelectionControlComponent::UpdateSelectionActors(TArray<AActor*> const& NewSelectedActors)
 {
@@ -29,6 +35,8 @@ void USelectionControlComponent::UpdateSelectionActors(TArray<AActor*> const& Ne
     }
 
     SelectedActors = NewSelectedActorsSet;
+
+    OnUpdateSelectedActors.Broadcast(SelectedActors.Array(), ActorsToDeselect.Array(), ActorsToSelect.Array());
 }
 
 AActor* USelectionControlComponent::GetActorUnderMouseCursor() const
@@ -40,19 +48,6 @@ AActor* USelectionControlComponent::GetActorUnderMouseCursor() const
     return HitResult.GetActor();
 }
 
-FVector USelectionControlComponent::GetMouseWorldLocation() const
-{
-    FHitResult HitResult;
-    if (!PlayerController)
-        return FVector::ZeroVector;
-    if (PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, HitResult))
-        return HitResult.Location;
-    if (PlayerController->DeprojectMousePositionToWorld(HitResult.Location, HitResult.ImpactNormal))
-        return HitResult.Location;
-
-    return HitResult.Location;
-}
-
 void USelectionControlComponent::TickComponent(
     float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -61,7 +56,7 @@ void USelectionControlComponent::TickComponent(
     if (!PlayerController)
         return;
 
-    EndSelectionLocation = GetMouseWorldLocation();
+    EndSelectionLocation = AGamePlayerController::GetMouseWorldLocation(PlayerController);
 
     if (bIsDetectSelection)
     {
@@ -92,12 +87,21 @@ void USelectionControlComponent::OnSetupInputComponent(UEnhancedInputComponent* 
     InputComponent->BindAction(CommandAction, ETriggerEvent::Completed, this, &USelectionControlComponent::OnCommand);
 }
 
+void USelectionControlComponent::OnDeactivateInput()
+{
+    Super::OnDeactivateInput();
+
+    bIsSelection       = false;
+    bIsDetectSelection = false;
+
+}
+
 void USelectionControlComponent::OnSelectionStarted(FInputActionValue const& InputAction)
 {
     bIsSelection       = false;
     bIsDetectSelection = true;
 
-    StartSelectionLocation = GetMouseWorldLocation();
+    StartSelectionLocation = AGamePlayerController::GetMouseWorldLocation(PlayerController);
     EndSelectionLocation   = StartSelectionLocation;
 }
 

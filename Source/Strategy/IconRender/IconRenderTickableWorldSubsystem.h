@@ -27,7 +27,6 @@ protected:
     virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
 private:
-    void OnWorldTick();
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
     float TimeSinceLastTick = 0.0f;

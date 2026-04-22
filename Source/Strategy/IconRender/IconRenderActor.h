@@ -13,7 +13,7 @@ class USpringArmComponent;
 /**
  *
  */
-UCLASS(Abstract)
+UCLASS(Blueprintable,Abstract)
 class STRATEGY_API AIconRenderActor : public AActor
 {
 	GENERATED_BODY()

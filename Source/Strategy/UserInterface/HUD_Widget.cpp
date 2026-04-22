@@ -4,6 +4,11 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/SlateBlueprintLibrary.h"
 #include "GamePlayerController.h"
+#include "SelectionControlComponent.h"
+#include "BuildControlComponent.h"
+#include "CheckFieldMacros.h"
+#include "Components/ListView.h"
+#include "Components/WidgetSwitcher.h"
 
 void UHUDWidget::NativeConstruct()
 {
@@ -14,6 +19,19 @@ void UHUDWidget::NativeConstruct()
         return;
 
     PlayerController = Cast<AGamePlayerController>(World->GetFirstPlayerController());
+    CHECK_FIELD_RETURN(LogTemp, PlayerController);
+
+    SelectionControlComponent = PlayerController->FindComponentByClass<USelectionControlComponent>();
+    CHECK_FIELD_RETURN(LogTemp, SelectionControlComponent);
+
+    BuildControlComponent = PlayerController->FindComponentByClass<UBuildControlComponent>();
+    CHECK_FIELD_RETURN(LogTemp, BuildControlComponent);
+    UpdateListViewBuilds(BuildControlComponent->GetAvailableBuilds());
+
+    PlayerController->OnSwitchControlComponent.AddUniqueDynamic(this, &UHUDWidget::OnSwitchControlComponent);
+    PlayerController->BroadcastSwitchControlComponent();
+
+    SelectionControlComponent->OnUpdateSelectedActors.AddUniqueDynamic(this, &UHUDWidget::OnUpdateSelectedActors);
 }
 
 int32 UHUDWidget::NativePaint(FPaintArgs const& Args, FGeometry const& AllottedGeometry,
@@ -23,16 +41,17 @@ int32 UHUDWidget::NativePaint(FPaintArgs const& Args, FGeometry const& AllottedG
     int32 MaxLayer = Super::NativePaint(
         Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
-    if (PlayerController && PlayerController->IsSelection())
+    if (PlayerController && SelectionControlComponent && SelectionControlComponent->IsSelection())
     {
         auto World = GetWorld();
         if (!World)
             return MaxLayer;
 
         FVector2D ScreenStart;
-        PlayerController->ProjectWorldLocationToScreen(PlayerController->GetStartSelectionLocation(), ScreenStart);
+        PlayerController->ProjectWorldLocationToScreen(
+            SelectionControlComponent->GetStartSelectionLocation(), ScreenStart);
         FVector2D ScreenEnd;
-        PlayerController->ProjectWorldLocationToScreen(PlayerController->GetEndSelectionLocation(), ScreenEnd);
+        PlayerController->ProjectWorldLocationToScreen(SelectionControlComponent->GetEndSelectionLocation(), ScreenEnd);
 
         FVector2D LocalStart;
         USlateBlueprintLibrary::ScreenToWidgetLocal(this, AllottedGeometry, ScreenStart, LocalStart, true);
@@ -54,3 +73,41 @@ int32 UHUDWidget::NativePaint(FPaintArgs const& Args, FGeometry const& AllottedG
 
     return MaxLayer;
 }
+
+void UHUDWidget::UpdateListViewBuilds(TArray<TSubclassOf<AActor>> AvailableBuilds)
+{
+    if (!ListViewBuilds)
+        return;
+
+    ListViewBuilds->ClearListItems();
+    for (auto Actor : AvailableBuilds)
+    {
+        ListViewBuilds->AddItem(Actor);
+    }
+}
+
+void UHUDWidget::OnSwitchControlComponent(UBaseControlComponent* CurrentControlComponent)
+{
+    if (!WidgetSwitcher)
+        return;
+
+    // Temporary
+    if (CurrentControlComponent == SelectionControlComponent)
+        WidgetSwitcher->SetActiveWidgetIndex(0); // Units == 0
+    else
+        WidgetSwitcher->SetActiveWidgetIndex(1); // Builds == 1
+}
+
+void UHUDWidget::OnUpdateSelectedActors(TArray<AActor*> SelectedActors, TArray<AActor*> ActorsToDeselect,
+    TArray<AActor*> ActorsToSelect)
+{
+    if (!ListViewUnits)
+        return;
+
+    // Temporary
+    ListViewUnits->ClearListItems();
+    for (auto Actor : SelectedActors)
+    {
+        ListViewUnits->AddItem(Actor);
+    }
+}   

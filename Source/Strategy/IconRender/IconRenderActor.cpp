@@ -8,8 +8,11 @@
 
 AIconRenderActor::AIconRenderActor()
 {
+    auto RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
+    RootComponent           = RootSceneComponent;
+
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
-    SpringArmComponent->SetupAttachment(RootComponent);
+    SpringArmComponent->SetupAttachment(GetRootComponent());
 
     SceneCaptureComponent2D = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureComponent2D"));
     SceneCaptureComponent2D->SetupAttachment(SpringArmComponent);
@@ -17,11 +20,6 @@ AIconRenderActor::AIconRenderActor()
     SceneCaptureComponent2D->PrimitiveRenderMode                = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
     SceneCaptureComponent2D->bCaptureEveryFrame                 = false;
     SceneCaptureComponent2D->bCaptureOnMovement                 = false;
-    SceneCaptureComponent2D->ViewLightingChannels.bViewChannel0 = false;
-    SceneCaptureComponent2D->ViewLightingChannels.bViewChannel1 = true;
-    SceneCaptureComponent2D->ViewLightingChannels.bViewChannel2 = false;
-    SceneCaptureComponent2D->ViewLightingChannels.bViewChannel3 = false;
-    SceneCaptureComponent2D->ViewLightingChannels.bViewChannel4 = false;
 }
 
 bool AIconRenderActor::ExecuteRender(TSubclassOf<AActor> RenderClass, UTextureRenderTarget2D* RenderTarget)
@@ -83,9 +81,10 @@ void AIconRenderActor::SpawnAndSettingsActor(TSubclassOf<AActor> ActorClass)
 
     for (auto PrimitiveComponent : PrimitiveComponents)
     {
-        PrimitiveComponent->LightingChannels.bChannel0 = (false);
-        PrimitiveComponent->LightingChannels.bChannel1 = (true);
-        PrimitiveComponent->LightingChannels.bChannel2 = (false);
+        PrimitiveComponent->LightingChannels.bChannel0 = false;
+        PrimitiveComponent->LightingChannels.bChannel1 = true;
+        PrimitiveComponent->LightingChannels.bChannel2 = false;
+        PrimitiveComponent->MarkRenderStateDirty();
     }
 
     SceneCaptureComponent2D->ShowOnlyActors.Add(SpawnedActor);

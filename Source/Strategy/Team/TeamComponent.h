@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "TeamComponent.generated.h"
 
-
 UCLASS(ClassGroup = (UnitComponent), meta = (BlueprintSpawnableComponent))
 class STRATEGY_API UTeamComponent : public UActorComponent
 {

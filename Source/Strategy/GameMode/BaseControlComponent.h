@@ -21,7 +21,7 @@ protected:
     void         DeactivateInput();
     void         SetupInputComponent(UEnhancedInputComponent* InputComponent);
 
-    UPROPERTY(EditDefaultsOnly, Category = "Imput")
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     class UInputMappingContext* InputMappingContext;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug")

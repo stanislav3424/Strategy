@@ -10,16 +10,14 @@ void UIconRenderTickableWorldSubsystem::Tick(float DeltaTime)
     if (!IconRenderSubsystem)
         return;
 
-    if (IsAsyncLoading)
-        return;
-
     TimeSinceLastTick += DeltaTime;
 
     if (TimeSinceLastTick >= TickInterval)
     {
-        OnWorldTick();
         TimeSinceLastTick = 0.0f;
+        IconRenderSubsystem->Tick();
     }
+
 }
 
 void UIconRenderTickableWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
@@ -28,9 +26,4 @@ void UIconRenderTickableWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
     IconRenderSubsystem =
         UGameInstance::GetSubsystem<UIconRenderSubsystem>(InWorld.GetGameInstance());
-}
-
-void UIconRenderTickableWorldSubsystem::OnWorldTick()
-{
-
 }
