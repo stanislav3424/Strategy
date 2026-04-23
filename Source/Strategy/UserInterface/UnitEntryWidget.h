@@ -3,28 +3,44 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "EntryWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "UnitEntryWidget.generated.h"
 
+UCLASS(NotBlueprintable)
+class UUnitEntryObject : public UObject
+{
+    GENERATED_BODY()
+
+public:
+    UPROPERTY(BlueprintReadOnly, Category = "UnitsInfo")
+    TSubclassOf<AActor> UnitClass;
+
+    UPROPERTY(BlueprintReadOnly, Category = "UnitsInfo")
+    int32 NumUnits = 0;
+
+    UPROPERTY(BlueprintReadOnly, Category = "UnitsInfo")
+    TArray<AActor*> Units;
+};
+
 /**
- * 
+ *
  */
-UCLASS(Blueprintable, Abstract)
-class STRATEGY_API UUnitEntryWidget : public UUserWidget, public IUserObjectListEntry
+UCLASS(Blueprintable, Abstract) class STRATEGY_API UUnitEntryWidget : public UEntryWidget
 {
     GENERATED_BODY()
 
 public:
     virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+    virtual void NativeOnItemSelectionChanged(bool bIsSelected) override;
+    virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
-protected:
-    UFUNCTION()
-    void OnIconReady(UTexture* Icon);
+    UFUNCTION(BlueprintCallable, Category = "UnitsInfo")
+    TSubclassOf<AActor> GetUnitClass() const;
 
-    UPROPERTY(meta = (BindWidget))
-    class UImage* UnitIcon;
+    UFUNCTION(BlueprintCallable, Category = "UnitsInfo")
+    int32 GetNumUnits() const;
 
-    UPROPERTY(EditDefaultsOnly, Category = "IconRenderActorClass")
-    TSubclassOf<class AIconRenderActor> IconRenderActorClass;
+    UFUNCTION(BlueprintCallable, Category = "UnitsInfo")
+    TArray<AActor*> GetUnits() const;
 };

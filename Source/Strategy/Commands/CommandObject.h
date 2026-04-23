@@ -35,13 +35,14 @@ public:
     void ExecuteCommand(AActor* Owner, FVector TargetLocation = FVector::ZeroVector, AActor* TargetActor = nullptr);
     void EndExecution();
     static TArray<class UTurretCommandComponent*> GetChildTurretCommandComponents(AActor* Owner);
+    class UTexture*                               GetIcon() const { return Icon; }
 
 protected:
     virtual void OnExecuteeCommand(AActor* Owner, FVector TargetLocation,
         AActor* TargetActor, class UBlackboardComponent* BlackboardComponent) {};
     virtual void OnEndExecution(AActor* Owner) {};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BehaviorTree")
+    UPROPERTY(EditDefaultsOnly, Category = "BehaviorTree")
     class UBehaviorTree* BehaviorTreeToExecute;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug")
@@ -55,6 +56,9 @@ protected:
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug")
     class UBlackboardComponent* BlackboardComponent_Internal;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Icon")
+    class UTexture* Icon;
 };
 
 UCLASS(Abstract, Blueprintable)

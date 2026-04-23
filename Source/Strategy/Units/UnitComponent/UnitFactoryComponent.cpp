@@ -134,3 +134,18 @@ void UUnitFactoryComponent::BeginPlay()
         }
     }
 }
+
+void UUnitFactoryComponent::OnRegister()
+{
+    Super::OnRegister();
+
+    // Обход бага Template Mismatch:
+    if (SpawnPoint)
+    {
+        SpawnPoint->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+    }
+    if (MovePoint)
+    {
+        MovePoint->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+    }
+}

@@ -29,21 +29,50 @@ protected:
 
     void UpdateListViewBuilds(TArray<TSubclassOf<AActor>> AvailableBuilds);
 
-    UFUNCTION()
-    void OnSwitchControlComponent(class UBaseControlComponent* CurrentControlComponent);
+    //UFUNCTION()
+    //void OnSwitchControlComponent(class UBaseControlComponent* CurrentControlComponent);
 
     UFUNCTION()
     void OnUpdateSelectedActors(
         TArray<AActor*> SelectedActors, TArray<AActor*> ActorsToDeselect, TArray<AActor*> ActorsToSelect);
 
-    UPROPERTY(EditDefaultsOnly, meta = (BindWidget), Category = "Components")
+    void SetIndexWidgetSwitchers(int32 Index);
+
+    UFUNCTION()
+    void OnButtonSelectionUnitsClicked();
+
+    UFUNCTION()
+    void OnButtonProductionClicked();
+
+    UFUNCTION()
+    void OnButtonBuildingClicked();
+
+    UPROPERTY(meta = (BindWidget))
     class UListView* ListViewUnits;
 
-    UPROPERTY(EditDefaultsOnly, meta = (BindWidget), Category = "Components")
+    UPROPERTY(meta = (BindWidget))
     class UListView* ListViewBuilds;
 
-    UPROPERTY(EditDefaultsOnly, meta = (BindWidget), Category = "Components")
-    class UWidgetSwitcher* WidgetSwitcher;
+    UPROPERTY(meta = (BindWidget))
+    class UWidgetSwitcher* WidgetSwitcherButtons;
+
+    UPROPERTY(meta = (BindWidget))
+    class UWidgetSwitcher* WidgetSwitcherLists;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* ButtonSelectionUnits;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* ButtonBuilding;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* ButtonProduction;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTileView* TileViewUnits;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTileView* TileViewBuilds;
 
     UPROPERTY(EditDefaultsOnly, Category = "Selection")
     class USlateBrushAsset* SlateBrushAssetBox;

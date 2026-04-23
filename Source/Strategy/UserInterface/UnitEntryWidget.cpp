@@ -4,30 +4,72 @@
 #include "IconRenderLibrary.h"
 #include "Components/Image.h"
 #include "CheckFieldMacros.h"
+#include "GamePlayerController.h"
+#include "SelectionControlComponent.h"
 
 void UUnitEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
-{ 
-	auto Actor =Cast<AActor>(ListItemObject);
-    if (!Actor)
-        return;
-
-    FOnIconReady IconReadyDelegate;
-    IconReadyDelegate.BindDynamic(this, &UUnitEntryWidget::OnIconReady);
-
-    UIconRenderLibrary::RequestIcon(this, IconRenderActorClass, Actor->GetClass(), IconReadyDelegate);
+{
+    SetContext(GetUnitClass());
 }
 
-void UUnitEntryWidget::OnIconReady(UTexture* Icon)
+void UUnitEntryWidget::NativeOnItemSelectionChanged(bool bIsSelected)
 {
-    UE_LOG(LogTemp, Error, TEXT("UUnitEntryWidget::OnIconReady - Icon is ready"));
-
-    if (!UnitIcon)
+    if (!bIsSelected)
         return;
 
-    CHECK_FIELD_RETURN(LogTemp, Icon);
+    auto PlayerController = Cast<AGamePlayerController>(GetOwningPlayer());
+    if (!PlayerController)
+        return;
 
-    auto DynamicMaterial = UnitIcon->GetDynamicMaterial();
-    CHECK_FIELD_RETURN(LogTemp, DynamicMaterial);
+    auto SelectionControlComponent = PlayerController->FindComponentByClass<USelectionControlComponent>();
+    if (!SelectionControlComponent)
+        return;
 
-    DynamicMaterial->SetTextureParameterValue(TEXT("Icon"), Icon);
+    SelectionControlComponent->UpdateSelectionActors(GetUnits());
+}
+
+FReply UUnitEntryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+    auto PlayerController = Cast<AGamePlayerController>(GetOwningPlayer());
+    if (!PlayerController)
+        return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+    auto SelectionControlComponent = PlayerController->FindComponentByClass<USelectionControlComponent>();
+    if (!SelectionControlComponent)
+        return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+    if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
+    {
+        SelectionControlComponent->UpdateSelectionActors(GetUnits());
+        return FReply::Handled();
+    }
+
+    return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+}
+
+TSubclassOf<AActor> UUnitEntryWidget::GetUnitClass() const
+{
+    auto UnitEntryObject = Cast<UUnitEntryObject>(GetListItem());
+    if (!UnitEntryObject)
+        return nullptr;
+
+    return UnitEntryObject->UnitClass;
+}
+
+int32 UUnitEntryWidget::GetNumUnits() const
+{
+    auto UnitEntryObject = Cast<UUnitEntryObject>(GetListItem());
+    if (!UnitEntryObject)
+        return 0;
+
+    return UnitEntryObject->NumUnits;
+}
+
+TArray<AActor*> UUnitEntryWidget::GetUnits() const
+{
+    auto UnitEntryObject = Cast<UUnitEntryObject>(GetListItem());
+    if (!UnitEntryObject)
+        return TArray<AActor*>();
+
+    return UnitEntryObject->Units;
 }

@@ -32,11 +32,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+    virtual void OnRegister() override;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Instanced, Category = "Unit Factory")
     class UStaticMeshComponent* SelectionMesh;
 
 private:
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    bool bIsSelected = false;
+    bool bIsSelected = true;
 };

@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "TeamComponent.generated.h"
 
-UCLASS(ClassGroup = (UnitComponent), meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (UnitComponent))
 class STRATEGY_API UTeamComponent : public UActorComponent
 {
     GENERATED_BODY()

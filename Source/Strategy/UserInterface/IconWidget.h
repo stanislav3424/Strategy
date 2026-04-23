@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ContextWidget.h"
+#include "UserInterface/ContextWidget.h"
 #include "IconWidget.generated.h"
 
 /**
@@ -12,17 +12,11 @@
 UCLASS(Blueprintable, Abstract)
 class STRATEGY_API UIconWidget : public UContextWidget
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 protected:
     virtual void OnContextObjectSet(UObject* NewContextObject) override;
 
-    UFUNCTION()
-    void OnIconReady(UTexture* Icon);
-
     UPROPERTY(meta = (BindWidget))
-    class UImage* UnitIcon;
-
-    UPROPERTY(EditDefaultsOnly, Category = "IconRenderActorClass")
-    TSubclassOf<class AIconRenderActor> IconRenderActorClass;
+    class UImage* Icon;
 };

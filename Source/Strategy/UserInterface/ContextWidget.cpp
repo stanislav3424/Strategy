@@ -3,7 +3,7 @@
 #include "ContextWidget.h"
 #include "Blueprint/WidgetTree.h"
 
-void UContextWidget::ContextObjectSet(UObject* NewContextObject)
+void UContextWidget::SetContext(UObject* NewContextObject)
 {
     if (ContextObject == NewContextObject)
         return;
@@ -15,12 +15,12 @@ void UContextWidget::ContextObjectSet(UObject* NewContextObject)
 
 void UContextWidget::OnContextObjectSet(UObject* NewContextObject)
 {
-    ChildContextObjectSet();
+    ChildContextObjectSet(NewContextObject);
 }
 
-void UContextWidget::ChildContextObjectSet()
+void UContextWidget::ChildContextObjectSet(UObject* NewContextObject)
 {
-    if (!ContextObject)
+    if (!NewContextObject)
         return;
 
     if (!WidgetTree)
@@ -30,5 +30,5 @@ void UContextWidget::ChildContextObjectSet()
     WidgetTree->GetChildWidgets(this->GetRootWidget(), Childrens);
     for (auto Children : Childrens)
         if (auto ContextWidget = Cast<UContextWidget>(Children))
-            ContextWidget->ContextObjectSet(ContextObject);
+            ContextWidget->SetContext(NewContextObject);
 }

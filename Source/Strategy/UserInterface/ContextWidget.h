@@ -15,11 +15,11 @@ class STRATEGY_API UContextWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
-    void ContextObjectSet(UObject* NewContextObject);
+    void SetContext(UObject* NewContextObject);
 
 protected:
     virtual void OnContextObjectSet(UObject* NewContextObject);
-    void ChildContextObjectSet();
+    void         ChildContextObjectSet(UObject* NewContextObject);
 
     UPROPERTY(BlueprintReadOnly, Category = "ContextObject")
     UObject* ContextObject;

@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable, Abstract)
 class STRATEGY_API AGameHUD : public AHUD
 {
     GENERATED_BODY()

@@ -7,5 +7,5 @@
 
 void UEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
-    ContextObjectSet(ListItemObject);
+    SetContext(ListItemObject);
 }

@@ -6,7 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "PawnUnit.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, Abstract)
 class STRATEGY_API APawnUnit : public APawn
 {
 	GENERATED_BODY()
@@ -15,8 +15,6 @@ public:
 	APawnUnit();
 
 protected:
-    virtual void BeginPlay() override;
-
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class USpawnComponent* SpawnComponent;
 
@@ -24,5 +22,8 @@ protected:
     class UTeamComponent* TeamComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    class UArmorComponent* ArmorComponent;	
+    class UArmorComponent* ArmorComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    class USelectionComponent* SelectionComponent;
 };

@@ -24,6 +24,8 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Commands")
     virtual void CancelCommand();
 
+    const TSet<TSubclassOf<UCommandObject>>& GetAvailableCommands() const { return AvailableCommands; }
+
 protected:
     void ExecuteCommand(UCommandObject* Command, FVector TargetLocation = FVector::ZeroVector, AActor* TargetActor = nullptr);
     virtual void BeginPlay() override;

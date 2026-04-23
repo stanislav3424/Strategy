@@ -6,7 +6,7 @@
 #include "GameFramework/Character.h"
 #include "CharacterUnit.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, Abstract)
 class STRATEGY_API ACharacterUnit : public ACharacter
 {
 	GENERATED_BODY()
@@ -26,4 +26,7 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class UUnitCommandComponent* UnitCommandComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    class USelectionComponent* SelectionComponent;
 };

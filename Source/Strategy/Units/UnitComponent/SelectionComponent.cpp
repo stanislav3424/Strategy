@@ -9,6 +9,7 @@ USelectionComponent::USelectionComponent()
     SelectionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SelectionMesh"));
     SelectionMesh->SetupAttachment(this);
     SelectionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    SelectionMesh->bHiddenInSceneCapture = true;
 }
 
 void USelectionComponent::SetSelected(bool bSelected)
@@ -17,21 +18,19 @@ void USelectionComponent::SetSelected(bool bSelected)
         return;
 
     bIsSelected = bSelected;
-    SelectionMesh->SetVisibility(bIsSelected);
+    if (SelectionMesh)
+        SelectionMesh->SetVisibility(bIsSelected);
 }
 
 USelectionComponent* USelectionComponent::GetSelectionComponent(AActor* Actor)
 {
-    if (!Actor)
-        return nullptr;
+    CHECK_FIELD_RETURN_VAL(LogTemp, Actor, nullptr);
 
-    if (auto Component = Actor->FindComponentByClass<USelectionComponent>())
-        return Component;
+    auto Component = Actor->FindComponentByClass<USelectionComponent>();
 
-    UE_LOG(LogTemp, Error, TEXT("USelectionComponent::GetSelectionComponent - Actor %s does not have a SelectionComponent!"),
-        *Actor->GetName());
+    CHECK_FIELD_RETURN_VAL(LogTemp, Component, nullptr);
 
-    return nullptr;
+    return Component;
 }
 
 bool USelectionComponent::IsSelected(AActor* Actor)
@@ -63,4 +62,15 @@ void USelectionComponent::BeginPlay()
     Super::BeginPlay();
 
     SetSelected(false);
+}
+
+void USelectionComponent::OnRegister()
+{
+    Super::OnRegister();
+
+    // Обход бага Template Mismatch:
+    if (SelectionMesh)
+    {
+        SelectionMesh->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+    }
 }

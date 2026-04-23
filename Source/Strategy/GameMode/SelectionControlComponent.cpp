@@ -73,6 +73,16 @@ void USelectionControlComponent::TickComponent(
     }
 }
 
+void USelectionControlComponent::SelectionStarted()
+{
+    OnSelectionStarted(FInputActionValue());
+}
+
+void USelectionControlComponent::SelectionCompleted()
+{
+    OnSelectionCompleted(FInputActionValue());
+}
+
 void USelectionControlComponent::OnSetupInputComponent(UEnhancedInputComponent* InputComponent)
 {
     Super::OnSetupInputComponent(InputComponent);

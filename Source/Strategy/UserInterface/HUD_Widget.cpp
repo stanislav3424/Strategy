@@ -8,7 +8,14 @@
 #include "BuildControlComponent.h"
 #include "CheckFieldMacros.h"
 #include "Components/ListView.h"
+#include "Components/TileView.h"
 #include "Components/WidgetSwitcher.h"
+#include "Components/Button.h"
+#include "CommandComponent.h"
+#include "CommandObject.h"
+#include "Components/WrapBox.h"
+#include "CommandEntryWidget.h"
+#include "UserInterface/UnitEntryWidget.h"
 
 void UHUDWidget::NativeConstruct()
 {
@@ -28,10 +35,25 @@ void UHUDWidget::NativeConstruct()
     CHECK_FIELD_RETURN(LogTemp, BuildControlComponent);
     UpdateListViewBuilds(BuildControlComponent->GetAvailableBuilds());
 
-    PlayerController->OnSwitchControlComponent.AddUniqueDynamic(this, &UHUDWidget::OnSwitchControlComponent);
-    PlayerController->BroadcastSwitchControlComponent();
+    //PlayerController->OnSwitchControlComponent.AddUniqueDynamic(this, &UHUDWidget::OnSwitchControlComponent);
+    //PlayerController->BroadcastSwitchControlComponent();
 
     SelectionControlComponent->OnUpdateSelectedActors.AddUniqueDynamic(this, &UHUDWidget::OnUpdateSelectedActors);
+
+    if (!ButtonSelectionUnits)
+        return;
+
+    ButtonSelectionUnits->OnClicked.AddUniqueDynamic(this, &UHUDWidget::OnButtonSelectionUnitsClicked);
+
+    if (!ButtonProduction)
+        return;
+
+    ButtonProduction->OnClicked.AddUniqueDynamic(this, &UHUDWidget::OnButtonProductionClicked);
+
+    if (!ButtonBuilding)
+        return;
+
+    ButtonBuilding->OnClicked.AddUniqueDynamic(this, &UHUDWidget::OnButtonBuildingClicked);
 }
 
 int32 UHUDWidget::NativePaint(FPaintArgs const& Args, FGeometry const& AllottedGeometry,
@@ -86,17 +108,17 @@ void UHUDWidget::UpdateListViewBuilds(TArray<TSubclassOf<AActor>> AvailableBuild
     }
 }
 
-void UHUDWidget::OnSwitchControlComponent(UBaseControlComponent* CurrentControlComponent)
-{
-    if (!WidgetSwitcher)
-        return;
-
-    // Temporary
-    if (CurrentControlComponent == SelectionControlComponent)
-        WidgetSwitcher->SetActiveWidgetIndex(0); // Units == 0
-    else
-        WidgetSwitcher->SetActiveWidgetIndex(1); // Builds == 1
-}
+//void UHUDWidget::OnSwitchControlComponent(UBaseControlComponent* CurrentControlComponent)
+//{
+//    if (!WidgetSwitcherButtons)
+//        return;
+//
+//    // Temporary
+//    if (CurrentControlComponent == SelectionControlComponent)
+//        WidgetSwitcherButtons->SetActiveWidgetIndex(0); // Units == 0
+//    else
+//        WidgetSwitcherButtons->SetActiveWidgetIndex(1); // Builds == 1
+//}
 
 void UHUDWidget::OnUpdateSelectedActors(TArray<AActor*> SelectedActors, TArray<AActor*> ActorsToDeselect,
     TArray<AActor*> ActorsToSelect)
@@ -104,10 +126,70 @@ void UHUDWidget::OnUpdateSelectedActors(TArray<AActor*> SelectedActors, TArray<A
     if (!ListViewUnits)
         return;
 
-    // Temporary
+    TMap<TSubclassOf<AActor>, TPair<int32, TArray<AActor*>>> UnitClassCounts;
+    for (auto Actor : SelectedActors)
+        if (Actor)
+        {
+            auto& UnitClassCount = UnitClassCounts.FindOrAdd(Actor->GetClass());
+            UnitClassCount.Key++;
+            UnitClassCount.Value.Add(Actor);
+        }
+
     ListViewUnits->ClearListItems();
+    for (auto const& Elem : UnitClassCounts)
+    {
+        auto EntryObject = NewObject<UUnitEntryObject>(this);
+        if (!EntryObject)
+            continue;
+        EntryObject->UnitClass = Elem.Key;
+        EntryObject->NumUnits  = Elem.Value.Key;
+        EntryObject->Units     = Elem.Value.Value;
+        ListViewUnits->AddItem(EntryObject);
+    }
+
+    // Commands
+    TSet<TSubclassOf<UCommandObject>> AvailableCommands;
     for (auto Actor : SelectedActors)
     {
-        ListViewUnits->AddItem(Actor);
+        auto CommandComponent = Actor->FindComponentByClass<UCommandComponent>();
+        if (!CommandComponent)
+            continue;
+
+        AvailableCommands.Append(CommandComponent->GetAvailableCommands());
     }
-}   
+
+    if (!TileViewUnits)
+        return;
+
+    TileViewUnits->ClearListItems();
+
+    for (auto CommandClass : AvailableCommands)
+    {
+        auto CommandObject = NewObject<UCommandObject>(this, CommandClass);
+        TileViewUnits->AddItem(CommandObject);
+    }
+}
+
+void UHUDWidget::SetIndexWidgetSwitchers(int32 Index)
+{
+    if (!WidgetSwitcherButtons || !WidgetSwitcherLists)
+        return;
+
+    WidgetSwitcherButtons->SetActiveWidgetIndex(Index);
+    WidgetSwitcherLists->SetActiveWidgetIndex(Index);
+}
+
+void UHUDWidget::OnButtonSelectionUnitsClicked()
+{
+    SetIndexWidgetSwitchers(0);
+}
+
+void UHUDWidget::OnButtonProductionClicked()
+{
+    SetIndexWidgetSwitchers(1);
+}
+
+void UHUDWidget::OnButtonBuildingClicked()
+{
+    SetIndexWidgetSwitchers(2);
+}

@@ -15,15 +15,15 @@ void AGameHUD::BeginPlay()
         return;
 
     PlayerController = Cast<AGamePlayerController>(World->GetFirstPlayerController());
-    CHECK_FIELD(LogTemp, PlayerController);
+    CHECK_FIELD_RETURN(LogTemp, PlayerController);
 
     SelectionControlComponent = PlayerController->FindComponentByClass<USelectionControlComponent>();
-    CHECK_FIELD(LogTemp, SelectionControlComponent);
+    CHECK_FIELD_RETURN(LogTemp, SelectionControlComponent);
 
+    CHECK_FIELD_RETURN(LogTemp, HUDWidgetClass);
     HUDWidget = CreateWidget<UHUDWidget>(World, HUDWidgetClass);
-    CHECK_FIELD(LogTemp, HUDWidget);
-
-    HUDWidget->AddToViewport();
+    CHECK_FIELD_RETURN(LogTemp, HUDWidget);
+    HUDWidget->AddToViewport(0);
 }
 
 void AGameHUD::DrawHUD()

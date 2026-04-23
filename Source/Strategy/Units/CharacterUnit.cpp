@@ -6,13 +6,16 @@
 #include "ArmorComponent.h"
 #include "Turret.h"
 #include "CommandComponent.h"
+#include "SelectionComponent.h"
 
 ACharacterUnit::ACharacterUnit()
 {
-    SpawnComponent        = CreateDefaultSubobject<USpawnComponent>(TEXT("SpawnComponent"));
-    TeamComponent         = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponent"));
-    ArmorComponent        = CreateDefaultSubobject<UArmorComponent>(TEXT("ArmorComponent"));
-    UnitCommandComponent  = CreateDefaultSubobject<UUnitCommandComponent>(TEXT("UnitCommandComponent"));
+    SpawnComponent       = CreateDefaultSubobject<USpawnComponent>(TEXT("SpawnComponent"));
+    TeamComponent        = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponent"));
+    ArmorComponent       = CreateDefaultSubobject<UArmorComponent>(TEXT("ArmorComponent"));
+    UnitCommandComponent = CreateDefaultSubobject<UUnitCommandComponent>(TEXT("UnitCommandComponent"));
+    SelectionComponent   = CreateDefaultSubobject<USelectionComponent>(TEXT("SelectionComponent"));
+    SelectionComponent->SetupAttachment(GetRootComponent());
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }

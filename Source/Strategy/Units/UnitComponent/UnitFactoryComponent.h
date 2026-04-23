@@ -31,15 +31,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
+    virtual void OnRegister() override;
 
 	UFUNCTION(BlueprintCallable)
     TArray<TSubclassOf<AActor>> const& GetQueue() const { return QueueSpawnUnitClasses; }
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Instanced, Category = "Unit Factory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,  Instanced, Category = "Unit Factory")
     class USphereComponent* SpawnPoint;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Instanced, Category = "Unit Factory")
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly,  Instanced, Category = "Unit Factory")
     class USphereComponent* MovePoint;
 
 	UPROPERTY(BlueprintAssignable)

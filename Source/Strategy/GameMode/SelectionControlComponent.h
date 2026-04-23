@@ -17,12 +17,15 @@ class STRATEGY_API USelectionControlComponent : public UBaseControlComponent
 public:
     USelectionControlComponent();
 
-    bool    IsSelection() const { return bIsSelection; }
-    FVector GetStartSelectionLocation() const { return StartSelectionLocation; }
-    FVector GetEndSelectionLocation() const { return EndSelectionLocation; }
-    void    UpdateSelectionActors(TArray<AActor*> const& NewSelectedActors);
-    AActor* GetActorUnderMouseCursor() const;
-    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+    bool         IsSelection() const { return bIsSelection; }
+    FVector      GetStartSelectionLocation() const { return StartSelectionLocation; }
+    FVector      GetEndSelectionLocation() const { return EndSelectionLocation; }
+    void         UpdateSelectionActors(TArray<AActor*> const& NewSelectedActors);
+    AActor*      GetActorUnderMouseCursor() const;
+    virtual void TickComponent(
+        float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+    void SelectionStarted();
+    void SelectionCompleted();
 
     UPROPERTY(BlueprintAssignable)
     FUpdateSelectedActors OnUpdateSelectedActors;
