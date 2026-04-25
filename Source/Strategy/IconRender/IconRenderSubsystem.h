@@ -6,7 +6,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "IconRenderSubsystem.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnIconReady, UTexture*, Icon);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnIconReady, UTexture*, Icon, int32, RequestId);
 
 USTRUCT(BlueprintType)
 struct FPendingCallbacks
@@ -14,7 +14,11 @@ struct FPendingCallbacks
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Debug")
-	TMap<UObject*, FOnIconReady> Callbacks;
+	int32 LastRequestId = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Debug")
+    TMap<int32, FOnIconReady> Callbacks;
+    ;
 };
 
 USTRUCT(BlueprintType)
@@ -43,8 +47,12 @@ class STRATEGY_API UIconRenderSubsystem : public UGameInstanceSubsystem
 	friend class UIconRenderTickableWorldSubsystem;
 
 public:
+
+	// Return Request ID
+    // Return 0 synchronous
+    // Return n asynchronous
 	UFUNCTION(BlueprintCallable)
-    void RequestIcon(UObject* Requester, TSubclassOf<class AIconRenderActor> IconRenderActorClass,
+    int32 RequestIcon(TSubclassOf<class AIconRenderActor> IconRenderActorClass,
         TSubclassOf<AActor> RenderClass, FOnIconReady Callback);
 
 private:

@@ -8,6 +8,7 @@ void UIconWidget::OnContextObjectSet(UObject* NewContextObject)
 {
     Super::OnContextObjectSet(NewContextObject);
 
+    // Temporely
     if (!Icon)
         return;
 

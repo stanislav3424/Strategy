@@ -8,6 +8,11 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FUpdateSelectedActors, TArray<AActor*>, SelectedActors, TArray<AActor*>,
     ActorsToDeselect, TArray<AActor*>, ActorsToSelect);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FUpdateAvailableCommands, TArray<TSubclassOf<class UCommandObject>>,
+    AvailableCommands, TArray<TSubclassOf<class UCommandObject>>, AvailableCommandsToRemove,
+    TArray<TSubclassOf<class UCommandObject>>, AvailableCommandsToAdd, TSubclassOf<class UCommandObject>,
+    CurrentCommand);
+
 
 UCLASS(ClassGroup = (ControlComponent))
 class STRATEGY_API USelectionControlComponent : public UBaseControlComponent
@@ -26,9 +31,13 @@ public:
         float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
     void SelectionStarted();
     void SelectionCompleted();
+    void SetCurrentCommand(TSubclassOf<class UCommandObject> NewCommand);
 
     UPROPERTY(BlueprintAssignable)
     FUpdateSelectedActors OnUpdateSelectedActors;
+
+    UPROPERTY(BlueprintAssignable)
+    FUpdateAvailableCommands OnUpdateAvailableCommands;
 
 protected:
     virtual void OnSetupInputComponent(UEnhancedInputComponent* InputComponent) override;
@@ -62,6 +71,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
     float DistanceThreshold = 25.f;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
+    TSet<TSubclassOf<class UCommandObject>> AvailableCommands;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
     TSubclassOf<class UCommandObject> CurrentCommand;

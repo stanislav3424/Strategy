@@ -36,6 +36,11 @@ protected:
     void OnUpdateSelectedActors(
         TArray<AActor*> SelectedActors, TArray<AActor*> ActorsToDeselect, TArray<AActor*> ActorsToSelect);
 
+    UFUNCTION()
+    void OnUpdateAvailableCommands(
+        TArray<TSubclassOf<class UCommandObject>> AvailableCommands, TArray<TSubclassOf<class UCommandObject>> AvailableCommandsToRemove,
+        TArray<TSubclassOf<class UCommandObject>> AvailableCommandsToAdd, TSubclassOf<class UCommandObject> CurrentCommand);
+
     void SetIndexWidgetSwitchers(int32 Index);
 
     UFUNCTION()

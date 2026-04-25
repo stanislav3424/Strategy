@@ -5,20 +5,30 @@
 #include "Components/Image.h"
 #include "CheckFieldMacros.h"
 
-void UUnitIconWidget::OnContextObjectSet(UObject* NewContextObject)
+void UUnitIconWidget::NativePreConstruct()
 {
-    Super::OnContextObjectSet(NewContextObject);
+    Super::NativePreConstruct();
 
-    CHECK_FIELD_RETURN(LogTemp, NewContextObject);
+    // Reset the icon to a loading state
+    auto DynamicMaterial = UnitIcon->GetDynamicMaterial();
+    CHECK_FIELD_RETURN(LogTemp, DynamicMaterial);
+    DynamicMaterial->SetScalarParameterValue(TEXT("IsLoading"), 1.f);
+
+    // UUnitIconWidget::OnIconReady int32 RequestId = 0 synchronous 
+    CurrentRequestId = 0;
+
+    if (!ContextObject)
+        return;
+
     CHECK_FIELD_RETURN(LogTemp, IconRenderActorClass);
 
     UClass* TargetActorClass = nullptr;
 
-    if (auto ContextActor = Cast<AActor>(NewContextObject))
+    if (auto ContextActor = Cast<AActor>(ContextObject))
     {
         TargetActorClass = ContextActor->GetClass();
     }
-    else if (auto ContextClass = Cast<UClass>(NewContextObject))
+    else if (auto ContextClass = Cast<UClass>(ContextObject))
     {
         if (ContextClass->IsChildOf(AActor::StaticClass()))
         {
@@ -36,11 +46,14 @@ void UUnitIconWidget::OnContextObjectSet(UObject* NewContextObject)
     FOnIconReady IconReadyDelegate;
     IconReadyDelegate.BindDynamic(this, &UUnitIconWidget::OnIconReady);
 
-    UIconRenderLibrary::RequestIcon(this, IconRenderActorClass, TargetActorClass, IconReadyDelegate);
+    CurrentRequestId = UIconRenderLibrary::RequestIcon(this, IconRenderActorClass, TargetActorClass, IconReadyDelegate);
 }
 
-void UUnitIconWidget::OnIconReady(UTexture* Icon)
+void UUnitIconWidget::OnIconReady(UTexture* Icon, int32 RequestId)
 {
+    if (CurrentRequestId != RequestId)
+        return;
+
     if (!UnitIcon)
         return;
 

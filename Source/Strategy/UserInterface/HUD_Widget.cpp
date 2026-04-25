@@ -39,20 +39,18 @@ void UHUDWidget::NativeConstruct()
     //PlayerController->BroadcastSwitchControlComponent();
 
     SelectionControlComponent->OnUpdateSelectedActors.AddUniqueDynamic(this, &UHUDWidget::OnUpdateSelectedActors);
+    SelectionControlComponent->OnUpdateAvailableCommands.AddUniqueDynamic(this, &UHUDWidget::OnUpdateAvailableCommands);
 
     if (!ButtonSelectionUnits)
         return;
-
     ButtonSelectionUnits->OnClicked.AddUniqueDynamic(this, &UHUDWidget::OnButtonSelectionUnitsClicked);
 
     if (!ButtonProduction)
         return;
-
     ButtonProduction->OnClicked.AddUniqueDynamic(this, &UHUDWidget::OnButtonProductionClicked);
 
     if (!ButtonBuilding)
         return;
-
     ButtonBuilding->OnClicked.AddUniqueDynamic(this, &UHUDWidget::OnButtonBuildingClicked);
 }
 
@@ -147,17 +145,12 @@ void UHUDWidget::OnUpdateSelectedActors(TArray<AActor*> SelectedActors, TArray<A
         ListViewUnits->AddItem(EntryObject);
     }
 
-    // Commands
-    TSet<TSubclassOf<UCommandObject>> AvailableCommands;
-    for (auto Actor : SelectedActors)
-    {
-        auto CommandComponent = Actor->FindComponentByClass<UCommandComponent>();
-        if (!CommandComponent)
-            continue;
+}
 
-        AvailableCommands.Append(CommandComponent->GetAvailableCommands());
-    }
-
+void UHUDWidget::OnUpdateAvailableCommands(TArray<TSubclassOf<class UCommandObject>> AvailableCommands,
+    TArray<TSubclassOf<class UCommandObject>>                                        AvailableCommandsToRemove,
+    TArray<TSubclassOf<class UCommandObject>> AvailableCommandsToAdd, TSubclassOf<class UCommandObject> CurrentCommand)
+{
     if (!TileViewUnits)
         return;
 
@@ -167,6 +160,10 @@ void UHUDWidget::OnUpdateSelectedActors(TArray<AActor*> SelectedActors, TArray<A
     {
         auto CommandObject = NewObject<UCommandObject>(this, CommandClass);
         TileViewUnits->AddItem(CommandObject);
+        if (CommandClass == CurrentCommand)
+        {
+            TileViewUnits->SetSelectedItem(CommandObject);
+        }
     }
 }
 

@@ -20,6 +20,7 @@ public:
 protected:
     virtual void OnContextObjectSet(UObject* NewContextObject);
     void         ChildContextObjectSet(UObject* NewContextObject);
+    void         UpdateAllConstructs();
 
     UPROPERTY(BlueprintReadOnly, Category = "ContextObject")
     UObject* ContextObject;

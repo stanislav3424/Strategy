@@ -32,7 +32,6 @@ UCLASS(Blueprintable, Abstract) class STRATEGY_API UUnitEntryWidget : public UEn
 
 public:
     virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-    virtual void NativeOnItemSelectionChanged(bool bIsSelected) override;
     virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
     UFUNCTION(BlueprintCallable, Category = "UnitsInfo")

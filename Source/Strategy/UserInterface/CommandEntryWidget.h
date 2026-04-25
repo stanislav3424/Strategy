@@ -16,5 +16,6 @@ class STRATEGY_API UCommandEntryWidget : public UEntryWidget
 
 protected:
     virtual void OnContextObjectSet(UObject* NewContextObject);
-
+    //virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+    virtual void NativeOnItemSelectionChanged(bool bIsSelected) override;
 };

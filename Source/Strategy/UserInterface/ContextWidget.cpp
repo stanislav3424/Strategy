@@ -16,6 +16,8 @@ void UContextWidget::SetContext(UObject* NewContextObject)
 void UContextWidget::OnContextObjectSet(UObject* NewContextObject)
 {
     ChildContextObjectSet(NewContextObject);
+
+    UpdateAllConstructs();
 }
 
 void UContextWidget::ChildContextObjectSet(UObject* NewContextObject)
@@ -31,4 +33,12 @@ void UContextWidget::ChildContextObjectSet(UObject* NewContextObject)
     for (auto Children : Childrens)
         if (auto ContextWidget = Cast<UContextWidget>(Children))
             ContextWidget->SetContext(NewContextObject);
+}
+
+void UContextWidget::UpdateAllConstructs()
+{
+    NativePreConstruct();
+    NativeConstruct();
+    PreConstruct(false);
+    Construct();
 }

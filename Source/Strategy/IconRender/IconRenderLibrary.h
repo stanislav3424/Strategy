@@ -16,7 +16,11 @@ class STRATEGY_API UIconRenderLibrary : public UBlueprintFunctionLibrary
     GENERATED_BODY()
 
 public:
-    UFUNCTION(BlueprintCallable, meta = (DefaultToSelf = "Requester"))
-    static void RequestIcon(UObject* Requester, TSubclassOf<class AIconRenderActor> IconRenderActorClass,
+
+    // Return Request ID
+    // Return 0 synchronous
+    // Return n asynchronous
+    UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+    static int32 RequestIcon(UObject* WorldContextObject, TSubclassOf<class AIconRenderActor> IconRenderActorClass,
         TSubclassOf<AActor> RenderClass, FOnIconReady Callback);
 };

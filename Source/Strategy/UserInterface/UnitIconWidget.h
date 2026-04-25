@@ -15,14 +15,17 @@ class STRATEGY_API UUnitIconWidget : public UContextWidget
     GENERATED_BODY()
 
 protected:
-    virtual void OnContextObjectSet(UObject* NewContextObject) override;
+    virtual void NativePreConstruct() override;
 
     UFUNCTION()
-    void OnIconReady(UTexture* Icon);
+    void OnIconReady(UTexture* Icon, int32 RequestId);
 
     UPROPERTY(meta = (BindWidget))
     class UImage* UnitIcon;
 
     UPROPERTY(EditDefaultsOnly, Category = "IconRenderActorClass")
     TSubclassOf<class AIconRenderActor> IconRenderActorClass;
+    
+    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
+    int32 CurrentRequestId = INDEX_NONE;
 };

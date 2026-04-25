@@ -15,6 +15,8 @@ USelectionControlComponent::USelectionControlComponent()
 
 void USelectionControlComponent::UpdateSelectionActors(TArray<AActor*> const& NewSelectedActors)
 {
+
+    // Unit selection
     TSet<AActor*> NewSelectedActorsSet;
     NewSelectedActorsSet.Append(UTeamSubsystem::GetActorsInTeam(UTeamSubsystem::GetPlayerTeamID(), NewSelectedActors));
 
@@ -25,18 +27,37 @@ void USelectionControlComponent::UpdateSelectionActors(TArray<AActor*> const& Ne
         return;
 
     for (auto Actor : ActorsToDeselect)
-    {
         USelectionComponent::SetSelected(Actor, false);
-    }
 
     for (auto Actor : ActorsToSelect)
-    {
         USelectionComponent::SetSelected(Actor, true);
-    }
 
     SelectedActors = NewSelectedActorsSet;
 
     OnUpdateSelectedActors.Broadcast(SelectedActors.Array(), ActorsToDeselect.Array(), ActorsToSelect.Array());
+
+    // Commands
+    TSet<TSubclassOf<UCommandObject>> NewAvailableCommands;
+    for (auto Actor : SelectedActors)
+    {
+        auto CommandComponent = Actor->FindComponentByClass<UCommandComponent>();
+        if (!CommandComponent)
+            continue;
+
+        NewAvailableCommands.Append(CommandComponent->GetAvailableCommands());
+    }
+    auto AvailableCommandsToRemove = AvailableCommands.Difference(NewAvailableCommands);
+    auto AvailableCommandsToAdd    = NewAvailableCommands.Difference(AvailableCommands);
+    AvailableCommands              = NewAvailableCommands;
+
+    if (!AvailableCommands.Contains(CurrentCommand))
+        CurrentCommand = nullptr;
+
+    if (AvailableCommands.Array().IsValidIndex(0))
+        CurrentCommand = AvailableCommands.Array()[0];
+
+    OnUpdateAvailableCommands.Broadcast(
+        AvailableCommands.Array(), AvailableCommandsToRemove.Array(), AvailableCommandsToAdd.Array(), CurrentCommand);
 }
 
 AActor* USelectionControlComponent::GetActorUnderMouseCursor() const
@@ -81,6 +102,17 @@ void USelectionControlComponent::SelectionStarted()
 void USelectionControlComponent::SelectionCompleted()
 {
     OnSelectionCompleted(FInputActionValue());
+}
+
+void USelectionControlComponent::SetCurrentCommand(TSubclassOf<class UCommandObject> NewCommand)
+{
+    if (CurrentCommand == NewCommand)
+        return;
+
+    if (AvailableCommands.Contains(NewCommand))
+        CurrentCommand = NewCommand;
+
+     OnUpdateAvailableCommands.Broadcast(AvailableCommands.Array(), {}, {}, CurrentCommand);
 }
 
 void USelectionControlComponent::OnSetupInputComponent(UEnhancedInputComponent* InputComponent)

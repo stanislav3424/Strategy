@@ -9,23 +9,9 @@
 
 void UUnitEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
-    SetContext(GetUnitClass());
-}
-
-void UUnitEntryWidget::NativeOnItemSelectionChanged(bool bIsSelected)
-{
-    if (!bIsSelected)
-        return;
-
-    auto PlayerController = Cast<AGamePlayerController>(GetOwningPlayer());
-    if (!PlayerController)
-        return;
-
-    auto SelectionControlComponent = PlayerController->FindComponentByClass<USelectionControlComponent>();
-    if (!SelectionControlComponent)
-        return;
-
-    SelectionControlComponent->UpdateSelectionActors(GetUnits());
+    // override
+    ChildContextObjectSet(GetUnitClass());
+    UpdateAllConstructs();
 }
 
 FReply UUnitEntryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

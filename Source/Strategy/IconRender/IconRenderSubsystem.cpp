@@ -4,17 +4,23 @@
 #include "IconRenderActor.h"
 #include "Engine/TextureRenderTarget2D.h"
 
-void UIconRenderSubsystem::RequestIcon(UObject* Requester, TSubclassOf<AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass, FOnIconReady Callback)
+int32 UIconRenderSubsystem::RequestIcon(TSubclassOf<AIconRenderActor> IconRenderActorClass, TSubclassOf<AActor> RenderClass, FOnIconReady Callback)
 {
     auto& IconRenderInfo = IconRenderInfos.FindOrAdd(IconRenderActorClass);
 
     if(auto CachedIcon = IconRenderInfo.CachedIcons.Find(RenderClass))
     {
-        Callback.ExecuteIfBound(*CachedIcon);
-        return;
+        Callback.ExecuteIfBound(*CachedIcon, 0);
+        return 0;
     }
 
-	IconRenderInfo.QueueRenderClasses.FindOrAdd(RenderClass).Callbacks.Add(Requester, Callback);
+    auto& Pending = IconRenderInfo.QueueRenderClasses.FindOrAdd(RenderClass);
+    int32 RequestId = ++Pending.LastRequestId;
+
+
+    Pending.Callbacks.Add(RequestId, Callback);
+
+    return RequestId;
 }
 
 void UIconRenderSubsystem::Tick()
@@ -74,9 +80,9 @@ void UIconRenderSubsystem::AddIcon(TSubclassOf<AIconRenderActor> IconRenderActor
 	IconRenderInfo.CachedIcons.Add(RenderClass, Icon);
 
     auto Callbacks = IconRenderInfo.QueueRenderClasses.Find(RenderClass);
-    for (auto& Callback : Callbacks->Callbacks)
+    for (auto& CallbackPair : Callbacks->Callbacks)
     {
-        Callback.Value.ExecuteIfBound(Icon);
+        CallbackPair.Value.ExecuteIfBound(Icon, CallbackPair.Key);
     }
 
 
