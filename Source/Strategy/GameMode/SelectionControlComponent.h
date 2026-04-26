@@ -6,9 +6,9 @@
 #include "GameMode/BaseControlComponent.h"
 #include "SelectionControlComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FUpdateSelectedActors, TArray<AActor*>, SelectedActors, TArray<AActor*>,
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUpdateSelectedActors, TArray<AActor*>, SelectedActors, TArray<AActor*>,
     ActorsToDeselect, TArray<AActor*>, ActorsToSelect);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FUpdateAvailableCommands, TArray<TSubclassOf<class UCommandObject>>,
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnUpdateAvailableCommands, TArray<TSubclassOf<class UCommandObject>>,
     AvailableCommands, TArray<TSubclassOf<class UCommandObject>>, AvailableCommandsToRemove,
     TArray<TSubclassOf<class UCommandObject>>, AvailableCommandsToAdd, TSubclassOf<class UCommandObject>,
     CurrentCommand);
@@ -34,10 +34,10 @@ public:
     void SetCurrentCommand(TSubclassOf<class UCommandObject> NewCommand);
 
     UPROPERTY(BlueprintAssignable)
-    FUpdateSelectedActors OnUpdateSelectedActors;
+    FOnUpdateSelectedActors OnUpdateSelectedActors;
 
     UPROPERTY(BlueprintAssignable)
-    FUpdateAvailableCommands OnUpdateAvailableCommands;
+    FOnUpdateAvailableCommands OnUpdateAvailableCommands;
 
 protected:
     virtual void OnSetupInputComponent(UEnhancedInputComponent* InputComponent) override;

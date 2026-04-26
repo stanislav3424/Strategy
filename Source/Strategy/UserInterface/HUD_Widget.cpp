@@ -151,21 +151,23 @@ void UHUDWidget::OnUpdateAvailableCommands(TArray<TSubclassOf<class UCommandObje
     TArray<TSubclassOf<class UCommandObject>>                                        AvailableCommandsToRemove,
     TArray<TSubclassOf<class UCommandObject>> AvailableCommandsToAdd, TSubclassOf<class UCommandObject> CurrentCommand)
 {
-    if (!TileViewUnits)
+    if (!TileViewCommands)
         return;
 
-    TileViewUnits->ClearListItems();
+    TileViewCommands->ClearListItems();
 
     for (auto CommandClass : AvailableCommands)
     {
         auto CommandObject = NewObject<UCommandObject>(this, CommandClass);
-        TileViewUnits->AddItem(CommandObject);
+        TileViewCommands->AddItem(CommandObject);
         if (CommandClass == CurrentCommand)
         {
-            TileViewUnits->SetSelectedItem(CommandObject);
+            TileViewCommands->SetSelectedItem(CommandObject);
         }
     }
+
 }
+
 
 void UHUDWidget::SetIndexWidgetSwitchers(int32 Index)
 {

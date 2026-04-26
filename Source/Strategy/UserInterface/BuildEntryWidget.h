@@ -3,18 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "Blueprint/IUserObjectListEntry.h"
+#include "EntryWidget.h"
 #include "BuildEntryWidget.generated.h"
 
-/**
- * 
- */
 UCLASS(Blueprintable, Abstract)
-class STRATEGY_API UBuildEntryWidget : public UUserWidget, public IUserObjectListEntry
+class STRATEGY_API UBuildEntryWidget : public UEntryWidget
 {
     GENERATED_BODY()
 
-public:
-    virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+protected:
+    virtual void OnContextObjectSet(UObject* NewContextObject);
+    virtual void NativeOnItemSelectionChanged(bool bIsSelected) override;
 };

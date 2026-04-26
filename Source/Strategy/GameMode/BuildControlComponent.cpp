@@ -35,6 +35,9 @@ void UBuildControlComponent::SelectAvailableBuild(int32 Index)
 
 void UBuildControlComponent::SelectAvailableBuild(TSubclassOf<AActor> BuildClass)
 {
+    if (GhostActorClass == BuildClass)
+        return;
+
     if (!AvailableBuilds.Contains(BuildClass))
     {
         UE_LOG(LogTemp, Error,
@@ -47,6 +50,8 @@ void UBuildControlComponent::SelectAvailableBuild(TSubclassOf<AActor> BuildClass
     GhostActorClass = BuildClass;
     SpawnGhostActor();
     UpdateGhostActor();
+
+    OnUpdateAvailableBuild.Broadcast(AvailableBuilds, {}, {}, GhostActorClass);
 }
 
 void UBuildControlComponent::BeginPlay()

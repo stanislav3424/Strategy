@@ -31,9 +31,6 @@ UCLASS(Blueprintable, Abstract) class STRATEGY_API UUnitEntryWidget : public UEn
     GENERATED_BODY()
 
 public:
-    virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-    virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-
     UFUNCTION(BlueprintCallable, Category = "UnitsInfo")
     TSubclassOf<AActor> GetUnitClass() const;
 
@@ -42,4 +39,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "UnitsInfo")
     TArray<AActor*> GetUnits() const;
+
+protected:
+    virtual void   OnContextObjectSet(UObject* NewContextObject);
+    virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 };

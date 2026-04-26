@@ -39,7 +39,9 @@ protected:
     UFUNCTION()
     void OnUpdateAvailableCommands(
         TArray<TSubclassOf<class UCommandObject>> AvailableCommands, TArray<TSubclassOf<class UCommandObject>> AvailableCommandsToRemove,
-        TArray<TSubclassOf<class UCommandObject>> AvailableCommandsToAdd, TSubclassOf<class UCommandObject> CurrentCommand);
+        TArray<TSubclassOf<class UCommandObject>>                            AvailableCommandsToAdd,
+        TSubclassOf<class UCommandObject>                                    CurrentCommand);
+
 
     void SetIndexWidgetSwitchers(int32 Index);
 
@@ -74,7 +76,7 @@ protected:
     class UButton* ButtonProduction;
 
     UPROPERTY(meta = (BindWidget))
-    class UTileView* TileViewUnits;
+    class UTileView* TileViewCommands;
 
     UPROPERTY(meta = (BindWidget))
     class UTileView* TileViewBuilds;

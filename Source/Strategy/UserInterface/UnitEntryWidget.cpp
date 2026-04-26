@@ -7,9 +7,8 @@
 #include "GamePlayerController.h"
 #include "SelectionControlComponent.h"
 
-void UUnitEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
+void UUnitEntryWidget::OnContextObjectSet(UObject* NewContextObject)
 {
-    // override
     ChildContextObjectSet(GetUnitClass());
     UpdateAllConstructs();
 }
@@ -27,6 +26,11 @@ FReply UUnitEntryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, co
     if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
     {
         SelectionControlComponent->UpdateSelectionActors(GetUnits());
+        return FReply::Handled();
+    }
+    if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+    {
+        //SelectionControlComponent->UpdateSelectionActors(GetUnits());
         return FReply::Handled();
     }
 

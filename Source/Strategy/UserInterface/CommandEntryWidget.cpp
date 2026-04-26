@@ -20,26 +20,6 @@ void UCommandEntryWidget::OnContextObjectSet(UObject* NewContextObject)
     UpdateAllConstructs();
 }
 
-//FReply UCommandEntryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-//{
-//    auto PlayerController = Cast<AGamePlayerController>(GetOwningPlayer());
-//    if (!PlayerController)
-//        return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-//
-//    auto SelectionControlComponent = PlayerController->FindComponentByClass<USelectionControlComponent>();
-//    if (!SelectionControlComponent)
-//        return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-//
-//    if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
-//    {
-//        if (ContextObject)
-//            SelectionControlComponent->SetCurrentCommand(ContextObject->GetClass());
-//        return FReply::Handled();
-//    }
-//
-//    return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-//}
-
 void UCommandEntryWidget::NativeOnItemSelectionChanged(bool bIsSelected)
 {
     if (!bIsSelected)
@@ -55,6 +35,4 @@ void UCommandEntryWidget::NativeOnItemSelectionChanged(bool bIsSelected)
 
     if (ContextObject)
         SelectionControlComponent->SetCurrentCommand(ContextObject->GetClass());
-
-    //UpdateAllConstructs();
 }
