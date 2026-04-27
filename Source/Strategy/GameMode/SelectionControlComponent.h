@@ -6,12 +6,9 @@
 #include "GameMode/BaseControlComponent.h"
 #include "SelectionControlComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUpdateSelectedActors, TArray<AActor*>, SelectedActors, TArray<AActor*>,
-    ActorsToDeselect, TArray<AActor*>, ActorsToSelect);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnUpdateAvailableCommands, TArray<TSubclassOf<class UCommandObject>>,
-    AvailableCommands, TArray<TSubclassOf<class UCommandObject>>, AvailableCommandsToRemove,
-    TArray<TSubclassOf<class UCommandObject>>, AvailableCommandsToAdd, TSubclassOf<class UCommandObject>,
-    CurrentCommand);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateSelectedActors, TArray<AActor*>, SelectedActors);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateAvailableCommandTasks, TArray<TSubclassOf<class UCommandTask>>,
+    AvailableCommandTasks, TSubclassOf<class UCommandTask>, CurrentCommand);
 
 
 UCLASS(ClassGroup = (ControlComponent))
@@ -31,13 +28,13 @@ public:
         float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
     void SelectionStarted();
     void SelectionCompleted();
-    void SetCurrentCommand(TSubclassOf<class UCommandObject> NewCommand);
+    void SetCurrentCommandTask(TSubclassOf<class UCommandTask> NewCommand);
 
     UPROPERTY(BlueprintAssignable)
     FOnUpdateSelectedActors OnUpdateSelectedActors;
 
     UPROPERTY(BlueprintAssignable)
-    FOnUpdateAvailableCommands OnUpdateAvailableCommands;
+    FOnUpdateAvailableCommandTasks OnUpdateAvailableCommandTasks;
 
 protected:
     virtual void OnSetupInputComponent(UEnhancedInputComponent* InputComponent) override;
@@ -73,9 +70,9 @@ private:
     float DistanceThreshold = 25.f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    TSet<TSubclassOf<class UCommandObject>> AvailableCommands;
+    TSet<TSubclassOf<class UCommandTask>> AvailableCommandTask;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
-    TSubclassOf<class UCommandObject> CurrentCommand;
+    TSubclassOf<class UCommandTask> CurrentCommandTask;
 
 };

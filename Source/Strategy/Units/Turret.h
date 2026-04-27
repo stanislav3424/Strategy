@@ -17,7 +17,4 @@ class STRATEGY_API ATurret : public APawnUnit
 public:
     ATurret();
 
-protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    class UTurretCommandComponent* TurretCommandComponent;
 };

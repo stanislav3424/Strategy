@@ -25,7 +25,7 @@ protected:
     class UArmorComponent* ArmorComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    class UUnitCommandComponent* UnitCommandComponent;
+    class UAICommandQueueComponent* AICommandQueueComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class USelectionComponent* SelectionComponent;

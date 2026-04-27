@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTask.h"
 #include "CommandTask.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTaskFinished, UCommandTask*, Task);
@@ -11,8 +10,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTaskFinished, UCommandTask*, Task
 /**
  * 
  */
-UCLASS(NotBlueprintable, Abstract)
-class STRATEGY_API UCommandTask : public UGameplayTask
+UCLASS(Blueprintable, Abstract)
+class STRATEGY_API UCommandTask : public UObject
 {
     GENERATED_BODY()
 
@@ -21,10 +20,16 @@ public:
     FOnTaskFinished OnTaskFinished;
 
     UFUNCTION(BlueprintCallable)
+    void SetAIController(AAIController* Controller) { AIController = Controller; }
+
+    UFUNCTION(BlueprintCallable)
     void SetTargetLocation(FVector Location) { TargetLocation = Location; }
 
     UFUNCTION(BlueprintCallable)
     void SetTargetActor(AActor* Actor) { TargetActor = Actor; }
+
+    UFUNCTION(BlueprintCallable)
+    class AAIController* GetAIController() const { return AIController; }
 
     UFUNCTION(BlueprintCallable)
     FVector GetTargetLocation() const { return TargetLocation; }
@@ -32,28 +37,46 @@ public:
     UFUNCTION(BlueprintCallable)
     AActor* GetTargetActor() const { return TargetActor; }
     
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "CommandInfo")
     UTexture2D* GetCommandIcon() const;
-    
-    UFUNCTION(BlueprintCallable)
+
+    UFUNCTION(BlueprintCallable, Category = "CommandInfo")
     FText GetCommandName() const { return CommandName; }
 
-protected:
-    virtual void Activate() override;
-    void         Finish();
+    UFUNCTION(BlueprintCallable)
+    void RunTask();
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Command Info")
+    UFUNCTION(BlueprintCallable)
+    void FinishTask();
+
+    UFUNCTION(BlueprintCallable)
+    bool IsRunning() const { return bIsRunning; }
+
+protected:
+    virtual void OnRunTask();
+    virtual void OnFinishTask();
+
+    UPROPERTY(EditDefaultsOnly, Category = "CommandInfo")
     UTexture2D* CommandIcon;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Command Info")
+    UPROPERTY(EditDefaultsOnly, Category = "CommandInfo")
     FText CommandName;
 
     //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Command Info")
     //FText CommandDescription;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug")
+    class AAIController* AIController = nullptr;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Debug")
     FVector TargetLocation = FVector::ZeroVector;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug")
     AActor* TargetActor = nullptr;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Debug")
+    bool bIsRunning = false;
+
+    UPROPERTY(EditDefaultsOnly, Category = "CommandInfo")
+    class UBehaviorTree* BehaviorTreeAsset;
 };

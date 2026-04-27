@@ -6,13 +6,16 @@
 #include "GameplayTask.h"
 #include "GameplayTasksComponent.h"
 #include "GameplayTaskOwnerInterface.h"
+#include "AIController.h"
 
-void UAICommandQueueComponent::AddTask(TSubclassOf<UCommandTask> TaskClass, FVector TargetLocation, AActor* TargetActor)
+void UAICommandQueueComponent::AddTask(TSubclassOf<UCommandTask> TaskClass, class AAIController* AIController, FVector TargetLocation, AActor* TargetActor)
 {
     CHECK_FIELD_RETURN(LogTemp, TaskClass);
-    auto Task = UGameplayTask::NewTask<UCommandTask>(*this);
+
+    UCommandTask* Task = NewObject<UCommandTask>(GetTransientPackage(), TaskClass);
     CHECK_FIELD_RETURN(LogTemp, Task);
 
+    Task->SetAIController(AIController);
     Task->SetTargetLocation(TargetLocation);
     Task->SetTargetActor(TargetActor);
 
@@ -56,20 +59,11 @@ void UAICommandQueueComponent::BeginPlay()
     auto Owner = GetOwner();
     if (!Owner)
         return;
-
-    GameplayTasksComponent = Owner->FindComponentByClass<UGameplayTasksComponent>();
-    CHECK_FIELD_RETURN(LogTemp, GameplayTasksComponent);
-
-    if(AvailableTasks.IsEmpty())
-        UE_LOG(LogTemp, Error, TEXT("No available tasks for %s"), *GetOwner()->GetName());
 }
 
 void UAICommandQueueComponent::TryStartNextTask()
 {
     if (CurrentTask)
-        return;
-
-    if (!GameplayTasksComponent)
         return;
 
     if (Queue.IsEmpty())
@@ -84,22 +78,21 @@ void UAICommandQueueComponent::TryStartNextTask()
     }
 
     CurrentTask->OnTaskFinished.AddDynamic(this, &UAICommandQueueComponent::OnTaskFinished);
-    UGameplayTasksComponent::RunGameplayTask(
-        *GameplayTasksComponent, *CurrentTask, 0, FGameplayResourceSet(), FGameplayResourceSet());
+    CurrentTask->RunTask();
 
 }
 
 void UAICommandQueueComponent::OnTaskFinished(UCommandTask* FinishedTask)
 {
-    EndCurrentTask();
+    if (!Queue.IsEmpty())
+        Queue.RemoveAt(0);
+    CurrentTask = nullptr;
+
     TryStartNextTask();
 }
 
 void UAICommandQueueComponent::EndCurrentTask()
 {
-    if (CurrentTask && CurrentTask->IsActive())
-        CurrentTask->EndTask();
-
-    Queue.RemoveAt(0);
-    CurrentTask = nullptr;
+    if (CurrentTask)
+        CurrentTask->FinishTask();
 }

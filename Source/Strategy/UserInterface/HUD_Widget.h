@@ -29,19 +29,15 @@ protected:
 
     void UpdateListViewBuilds(TArray<TSubclassOf<AActor>> AvailableBuilds);
 
-    //UFUNCTION()
-    //void OnSwitchControlComponent(class UBaseControlComponent* CurrentControlComponent);
+    // UFUNCTION()
+    // void OnSwitchControlComponent(class UBaseControlComponent* CurrentControlComponent);
 
     UFUNCTION()
-    void OnUpdateSelectedActors(
-        TArray<AActor*> SelectedActors, TArray<AActor*> ActorsToDeselect, TArray<AActor*> ActorsToSelect);
+    void OnUpdateSelectedActors(TArray<AActor*> SelectedActors);
 
     UFUNCTION()
     void OnUpdateAvailableCommands(
-        TArray<TSubclassOf<class UCommandObject>> AvailableCommands, TArray<TSubclassOf<class UCommandObject>> AvailableCommandsToRemove,
-        TArray<TSubclassOf<class UCommandObject>>                            AvailableCommandsToAdd,
-        TSubclassOf<class UCommandObject>                                    CurrentCommand);
-
+        TArray<TSubclassOf<class UCommandTask>> AvailableCommands, TSubclassOf<class UCommandTask> CurrentCommand);
 
     void SetIndexWidgetSwitchers(int32 Index);
 

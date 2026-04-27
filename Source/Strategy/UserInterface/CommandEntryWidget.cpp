@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CommandEntryWidget.h"
-#include "CommandObject.h"
+#include "Commands/CommandTask.h"
 #include "CheckFieldMacros.h"
 #include "GamePlayerController.h"
 #include "SelectionControlComponent.h"
@@ -9,13 +9,15 @@
 void UCommandEntryWidget::OnContextObjectSet(UObject* NewContextObject)
 {
     CHECK_FIELD_RETURN(LogTemp, NewContextObject);
-    auto CommandObject = Cast<UCommandObject>(NewContextObject);
-    CHECK_FIELD_RETURN(LogTemp, CommandObject);
+    auto CommandClass = Cast<UClass>(NewContextObject);
+    CHECK_FIELD_RETURN(LogTemp, CommandClass);
+    auto CommandTask  = NewObject<UCommandTask>(this, CommandClass);
+    CHECK_FIELD_RETURN(LogTemp, CommandTask);
 
-    auto Icon = CommandObject->GetIcon();
+    auto Icon = CommandTask->GetCommandIcon();
     CHECK_FIELD_RETURN(LogTemp, Icon);
 
-    // override 
+    // override
     ChildContextObjectSet(Icon);
     UpdateAllConstructs();
 }
@@ -34,5 +36,5 @@ void UCommandEntryWidget::NativeOnItemSelectionChanged(bool bIsSelected)
         return;
 
     if (ContextObject)
-        SelectionControlComponent->SetCurrentCommand(ContextObject->GetClass());
+        SelectionControlComponent->SetCurrentCommandTask(ContextObject->GetClass());
 }

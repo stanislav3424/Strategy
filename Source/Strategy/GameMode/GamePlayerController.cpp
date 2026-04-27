@@ -6,7 +6,6 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "CheckFieldMacros.h"
-#include "CommandComponent.h"
 #include "SelectionControlComponent.h"
 #include "BuildControlComponent.h"
 

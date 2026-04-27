@@ -11,8 +11,6 @@
 #include "Components/TileView.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/Button.h"
-#include "CommandComponent.h"
-#include "CommandObject.h"
 #include "Components/WrapBox.h"
 #include "CommandEntryWidget.h"
 #include "UserInterface/UnitEntryWidget.h"
@@ -39,7 +37,8 @@ void UHUDWidget::NativeConstruct()
     //PlayerController->BroadcastSwitchControlComponent();
 
     SelectionControlComponent->OnUpdateSelectedActors.AddUniqueDynamic(this, &UHUDWidget::OnUpdateSelectedActors);
-    SelectionControlComponent->OnUpdateAvailableCommands.AddUniqueDynamic(this, &UHUDWidget::OnUpdateAvailableCommands);
+    SelectionControlComponent->OnUpdateAvailableCommandTasks.AddUniqueDynamic(
+        this, &UHUDWidget::OnUpdateAvailableCommands);
 
     if (!ButtonSelectionUnits)
         return;
@@ -118,8 +117,7 @@ void UHUDWidget::UpdateListViewBuilds(TArray<TSubclassOf<AActor>> AvailableBuild
 //        WidgetSwitcherButtons->SetActiveWidgetIndex(1); // Builds == 1
 //}
 
-void UHUDWidget::OnUpdateSelectedActors(TArray<AActor*> SelectedActors, TArray<AActor*> ActorsToDeselect,
-    TArray<AActor*> ActorsToSelect)
+void UHUDWidget::OnUpdateSelectedActors(TArray<AActor*> SelectedActors)
 {
     if (!ListViewUnits)
         return;
@@ -144,30 +142,23 @@ void UHUDWidget::OnUpdateSelectedActors(TArray<AActor*> SelectedActors, TArray<A
         EntryObject->Units     = Elem.Value.Value;
         ListViewUnits->AddItem(EntryObject);
     }
-
 }
 
-void UHUDWidget::OnUpdateAvailableCommands(TArray<TSubclassOf<class UCommandObject>> AvailableCommands,
-    TArray<TSubclassOf<class UCommandObject>>                                        AvailableCommandsToRemove,
-    TArray<TSubclassOf<class UCommandObject>> AvailableCommandsToAdd, TSubclassOf<class UCommandObject> CurrentCommand)
+void UHUDWidget::OnUpdateAvailableCommands(
+    TArray<TSubclassOf<class UCommandTask>> AvailableCommands, TSubclassOf<class UCommandTask> CurrentCommand)
 {
     if (!TileViewCommands)
         return;
-
     TileViewCommands->ClearListItems();
-
     for (auto CommandClass : AvailableCommands)
     {
-        auto CommandObject = NewObject<UCommandObject>(this, CommandClass);
-        TileViewCommands->AddItem(CommandObject);
+        TileViewCommands->AddItem(CommandClass);
         if (CommandClass == CurrentCommand)
         {
-            TileViewCommands->SetSelectedItem(CommandObject);
+            TileViewCommands->SetSelectedItem(CommandClass);
         }
     }
-
 }
-
 
 void UHUDWidget::SetIndexWidgetSwitchers(int32 Index)
 {

@@ -13,8 +13,14 @@ class UAICommandQueueComponent : public UActorComponent
 
 public:
     UFUNCTION(BlueprintCallable)
-    void AddTask(TSubclassOf<class UCommandTask> TaskClass, FVector TargetLocation = FVector::ZeroVector,
-        AActor* TargetActor = nullptr);
+    static UAICommandQueueComponent* GetAICommandQueueComponent(AActor* Actor)
+    {
+        return Actor ? Actor->FindComponentByClass<UAICommandQueueComponent>() : nullptr;
+    }
+
+    UFUNCTION(BlueprintCallable)
+    void AddTask(TSubclassOf<class UCommandTask> TaskClass, class AAIController* AIController,
+        FVector TargetLocation = FVector::ZeroVector, AActor* TargetActor = nullptr);
 
     UFUNCTION(BlueprintCallable)
     void ClearQueue();
@@ -40,6 +46,7 @@ public:
 protected:
     virtual void BeginPlay() override;
     void         TryStartNextTask();
+    UFUNCTION()
     void         OnTaskFinished(class UCommandTask* FinishedTask);
     void         EndCurrentTask();
 
@@ -49,9 +56,6 @@ protected:
     UPROPERTY(BlueprintReadOnly, Category = "Debug")
     TArray<class UCommandTask*> Queue;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Debug")
-    class UGameplayTasksComponent* GameplayTasksComponent;
-
-    UPROPERTY(BlueprintReadOnly, Category = "Debug")
+    UPROPERTY(EditDefaultsOnly, Category = "AvailableTasks")
     TArray<TSubclassOf<class UCommandTask>> AvailableTasks;
 };

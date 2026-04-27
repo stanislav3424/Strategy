@@ -1,12 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SelectionControlComponent.h"
-#include "CommandComponent.h"
 #include "TeamSubsystem.h"
 #include "SelectionComponent.h"
 #include "CheckFieldMacros.h"
 #include "EnhancedInputComponent.h"
 #include "GamePlayerController.h"
+#include "Commands/AICommandQueueComponent.h"
+#include "Commands/CommandTask.h"
+#include "AIController.h"
 
 USelectionControlComponent::USelectionControlComponent()
 {
@@ -34,30 +36,29 @@ void USelectionControlComponent::UpdateSelectionActors(TArray<AActor*> const& Ne
 
     SelectedActors = NewSelectedActorsSet;
 
-    OnUpdateSelectedActors.Broadcast(SelectedActors.Array(), ActorsToDeselect.Array(), ActorsToSelect.Array());
+    OnUpdateSelectedActors.Broadcast(SelectedActors.Array());
 
     // Commands
-    TSet<TSubclassOf<UCommandObject>> NewAvailableCommands;
+    TSet<TSubclassOf<UCommandTask>> NewAvailableCommandTasks;
     for (auto Actor : SelectedActors)
     {
-        auto CommandComponent = Actor->FindComponentByClass<UCommandComponent>();
+        auto CommandComponent = Actor->FindComponentByClass<UAICommandQueueComponent>();
         if (!CommandComponent)
             continue;
 
-        NewAvailableCommands.Append(CommandComponent->GetAvailableCommands());
+        NewAvailableCommandTasks.Append(CommandComponent->GetAvailableTasks());
     }
-    auto AvailableCommandsToRemove = AvailableCommands.Difference(NewAvailableCommands);
-    auto AvailableCommandsToAdd    = NewAvailableCommands.Difference(AvailableCommands);
-    AvailableCommands              = NewAvailableCommands;
 
-    if (!AvailableCommands.Contains(CurrentCommand))
-        CurrentCommand = nullptr;
+    AvailableCommandTask              = NewAvailableCommandTasks;
 
-    if (AvailableCommands.Array().IsValidIndex(0))
-        CurrentCommand = AvailableCommands.Array()[0];
+    if (!AvailableCommandTask.Contains(CurrentCommandTask))
+        CurrentCommandTask = nullptr;
 
-    OnUpdateAvailableCommands.Broadcast(
-        AvailableCommands.Array(), AvailableCommandsToRemove.Array(), AvailableCommandsToAdd.Array(), CurrentCommand);
+    if (AvailableCommandTask.Array().IsValidIndex(0))
+        CurrentCommandTask = AvailableCommandTask.Array()[0];
+
+    OnUpdateAvailableCommandTasks.Broadcast(
+        AvailableCommandTask.Array(), CurrentCommandTask);
 }
 
 AActor* USelectionControlComponent::GetActorUnderMouseCursor() const
@@ -104,15 +105,15 @@ void USelectionControlComponent::SelectionCompleted()
     OnSelectionCompleted(FInputActionValue());
 }
 
-void USelectionControlComponent::SetCurrentCommand(TSubclassOf<class UCommandObject> NewCommand)
+void USelectionControlComponent::SetCurrentCommandTask(TSubclassOf<class UCommandTask> NewCommandTask)
 {
-    if (CurrentCommand == NewCommand)
+    if (CurrentCommandTask == NewCommandTask)
         return;
 
-    if (AvailableCommands.Contains(NewCommand))
-        CurrentCommand = NewCommand;
+    if (AvailableCommandTask.Contains(NewCommandTask))
+        CurrentCommandTask = NewCommandTask;
 
-     OnUpdateAvailableCommands.Broadcast(AvailableCommands.Array(), {}, {}, CurrentCommand);
+     OnUpdateAvailableCommandTasks.Broadcast(AvailableCommandTask.Array(), CurrentCommandTask);
 }
 
 void USelectionControlComponent::OnSetupInputComponent(UEnhancedInputComponent* InputComponent)
@@ -165,7 +166,7 @@ void USelectionControlComponent::OnCommand(FInputActionValue const& InputAction)
     if (!PlayerController)
         return;
 
-    if (!CurrentCommand)
+    if (!CurrentCommandTask)
         return;
 
     FHitResult HitResult;
@@ -174,6 +175,7 @@ void USelectionControlComponent::OnCommand(FInputActionValue const& InputAction)
         return;
 
     for (auto Actor : SelectedActors)
-        if (auto CommandComponent = UCommandComponent::GetCommandComponent(Actor))
-            CommandComponent->ExecuteCommand(CurrentCommand, HitResult.Location, HitResult.GetActor());
+        if (auto AICommandQueueComponent = UAICommandQueueComponent::GetAICommandQueueComponent(Actor))
+            AICommandQueueComponent->AddTask(CurrentCommandTask, Actor->GetInstigatorController<AAIController>(),
+                HitResult.Location, HitResult.GetActor());
 }
