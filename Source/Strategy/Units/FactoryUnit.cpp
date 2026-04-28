@@ -6,4 +6,6 @@
 AFactoryUnit::AFactoryUnit()
 {
     UnitFactoryComponent = CreateDefaultSubobject<UUnitFactoryComponent>(TEXT("UnitFactoryComponent"));
+    UnitFactoryComponent->SetupAttachment(GetRootComponent());
+
 }

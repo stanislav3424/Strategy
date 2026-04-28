@@ -6,12 +6,17 @@
 #include "Components/ActorComponent.h"
 #include "AICommandQueueComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCommandQueueChanged);
+
 UCLASS(ClassGroup = (UnitComponent))
 class UAICommandQueueComponent : public UActorComponent
 {
     GENERATED_BODY()
 
 public:
+    UPROPERTY(BlueprintAssignable)
+    FOnCommandQueueChanged OnCommandQueueChanged;
+
     UFUNCTION(BlueprintCallable)
     static UAICommandQueueComponent* GetAICommandQueueComponent(AActor* Actor)
     {

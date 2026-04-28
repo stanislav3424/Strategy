@@ -21,6 +21,8 @@ void UAICommandQueueComponent::AddTask(TSubclassOf<UCommandTask> TaskClass, clas
 
     Queue.Add(Task);
     TryStartNextTask();
+
+    OnCommandQueueChanged.Broadcast();
 }
 
 void UAICommandQueueComponent::ClearQueue()
@@ -89,6 +91,8 @@ void UAICommandQueueComponent::OnTaskFinished(UCommandTask* FinishedTask)
     CurrentTask = nullptr;
 
     TryStartNextTask();
+
+    OnCommandQueueChanged.Broadcast();
 }
 
 void UAICommandQueueComponent::EndCurrentTask()
