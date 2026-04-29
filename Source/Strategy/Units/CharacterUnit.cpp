@@ -7,6 +7,7 @@
 #include "Commands/AICommandQueueComponent.h"
 #include "Units/UnitComponent/SelectionComponent.h"
 #include "Units/UnitComponent/PathSplineComponent.h"
+#include "Units/UnitComponent/PathDrawingComponent.h"
 
 ACharacterUnit::ACharacterUnit()
 {
@@ -23,6 +24,8 @@ ACharacterUnit::ACharacterUnit()
     PathSplineComponent->SetUsingAbsoluteLocation(true);
     PathSplineComponent->SetUsingAbsoluteRotation(true);
     PathSplineComponent->SetUsingAbsoluteScale(true);
+
+    //PathDrawingComponent = CreateDefaultSubobject<UPathDrawingComponent>(TEXT("PathDrawingComponent"));
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }

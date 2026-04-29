@@ -6,9 +6,11 @@
 #include "Components/SplineMeshComponent.h"
 #include "Commands/AICommandQueueComponent.h"
 #include "SelectionComponent.h"
+#include "NavigationSystem.h"
 
 UPathSplineComponent::UPathSplineComponent()
 {
+    PrimaryComponentTick.bCanEverTick = true;
     ClearSplinePoints(true);
 }
 
@@ -35,6 +37,46 @@ void UPathSplineComponent::BeginPlay()
     AICommandQueueComponent->OnCommandQueueChanged.AddDynamic(this, &UPathSplineComponent::UpdateSplinePointsInfo);
 }
 
+void UPathSplineComponent::TickComponent(
+    float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    // If less than 2 points, no need to update spline, just update owner location and return
+    if (SplinePointsInfo.Num() < 2)
+        return;
+
+    UpdateOwnerLocation();
+    ConstructSpline();
+}
+
+void UPathSplineComponent::UpdateOwnerLocation()
+{
+    auto Owner = GetOwner();
+    if (!Owner)
+        return;
+
+    UWorld* World = GetWorld();
+    if (!World)
+        return;
+
+    FVector OwnerLocation = Owner->GetActorLocation();
+
+    auto NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
+    if (NavigationSystem)
+    {
+        FNavLocation ProjectedLocation;
+        if (NavigationSystem->ProjectPointToNavigation(OwnerLocation, ProjectedLocation))
+            OwnerLocation = ProjectedLocation.Location;
+    }
+
+    if (!SplinePointsInfo.IsEmpty())
+    {
+        SplinePointsInfo[0].WorldLocation = OwnerLocation;
+        SplinePointsInfo[0].bIsDirty      = true;
+    }
+}
+
 void UPathSplineComponent::UpdateSplinePointsInfo()
 {
     if (!AICommandQueueComponent)
@@ -54,16 +96,16 @@ void UPathSplineComponent::UpdateSplinePointsInfo()
     {
         for (int32 Index = NewCount; Index < OldCount; ++Index)
         {
-            auto& Info = SplinePointsInfo[Index];
-            if (Info.PointMeshComponent)
+            auto& SplinePointInfo = SplinePointsInfo[Index];
+            if (SplinePointInfo.PointMeshComponent)
             {
-                Info.PointMeshComponent->DestroyComponent();
-                Info.PointMeshComponent = nullptr;
+                SplinePointInfo.PointMeshComponent->DestroyComponent();
+                SplinePointInfo.PointMeshComponent = nullptr;
             }
-            if (Info.NextSegmentSplineMeshComponent)
+            if (SplinePointInfo.NextSegmentSplineMeshComponent)
             {
-                Info.NextSegmentSplineMeshComponent->DestroyComponent();
-                Info.NextSegmentSplineMeshComponent = nullptr;
+                SplinePointInfo.NextSegmentSplineMeshComponent->DestroyComponent();
+                SplinePointInfo.NextSegmentSplineMeshComponent = nullptr;
             }
         }
         SplinePointsInfo.SetNum(NewCount);
@@ -84,115 +126,155 @@ void UPathSplineComponent::UpdateSplinePointsInfo()
             SplinePointsInfo[Index].Type = ETypeSplinePoint::End;
         else
             SplinePointsInfo[Index].Type = ETypeSplinePoint::Middle;
+
+
+        // Temporary
+        SplinePointsInfo[Index].bIsDirty = true;
     }
 
+    UpdateOwnerLocation();
     ConstructSpline();
 }
+
 void UPathSplineComponent::ConstructSpline()
 {
     ClearSplinePoints(false);
-
     for (int32 Index = 0; Index < SplinePointsInfo.Num(); ++Index)
     {
         auto const& SplinePointInfo = SplinePointsInfo[Index];
         AddSplinePoint(SplinePointInfo.WorldLocation, ESplineCoordinateSpace::World, false);
         SetSplinePointType(Index, ESplinePointType::Linear, false);
     }
-
     UpdateSpline();
 
-    for (int32 Index = 0; Index < SplinePointsInfo.Num(); ++Index)
+    ConstructSplineSegments();
+}
+
+void UPathSplineComponent::ConstructSplineSegments()
+{
+    // If less than 2 points, no need to construct segments, just clean up any existing mesh components
+    if (SplinePointsInfo.Num() < 2)
     {
-        if (!SplinePointsInfo.IsValidIndex(Index))
-            break;
-
-        auto& SplinePointInfo = SplinePointsInfo[Index];
-        if (!SplinePointInfo.PointMeshComponent)
+        for (auto& SplinePointInfo : SplinePointsInfo)
         {
-            SplinePointInfo.PointMeshComponent = NewObject<UStaticMeshComponent>(this);
-            if (!SplinePointInfo.PointMeshComponent)
-                break;
-            SplinePointInfo.PointMeshComponent->SetMobility(EComponentMobility::Movable);
-            SplinePointInfo.PointMeshComponent->AttachToComponent(
-                this, FAttachmentTransformRules::KeepRelativeTransform);
-            SplinePointInfo.PointMeshComponent->RegisterComponent();
-        }
-
-        if (!SplinePointInfo.PointMeshComponent)
-            break;
-
-        switch (SplinePointInfo.Type)
-        {
-            case ETypeSplinePoint::Start:
-                SplinePointInfo.PointMeshComponent->SetStaticMesh(SplinePointStartMesh);
-                break;
-            case ETypeSplinePoint::Middle:
-                SplinePointInfo.PointMeshComponent->SetStaticMesh(SplinePointMiddleMesh);
-                break;
-            case ETypeSplinePoint::End:
-                SplinePointInfo.PointMeshComponent->SetStaticMesh(SplinePointEndMesh);
-                break;
-            default:
-                SplinePointInfo.PointMeshComponent->SetStaticMesh(nullptr);
-                break;
-        }
-
-        SplinePointInfo.PointMeshComponent->SetWorldLocation(SplinePointInfo.WorldLocation);
-
-        if (SplinePointInfo.Type != ETypeSplinePoint::End)
-        {
-            if (!SplinePointInfo.NextSegmentSplineMeshComponent)
+            if (SplinePointInfo.PointMeshComponent)
             {
-                SplinePointInfo.NextSegmentSplineMeshComponent = NewObject<USplineMeshComponent>(this);
-                if (!SplinePointInfo.NextSegmentSplineMeshComponent)
-                    break;
-
-                SplinePointInfo.NextSegmentSplineMeshComponent->SetMobility(EComponentMobility::Movable);
-                SplinePointInfo.NextSegmentSplineMeshComponent->AttachToComponent(
-                    this, FAttachmentTransformRules::KeepRelativeTransform);
-                SplinePointInfo.NextSegmentSplineMeshComponent->RegisterComponent();
+                SplinePointInfo.PointMeshComponent->DestroyComponent();
+                SplinePointInfo.PointMeshComponent = nullptr;
             }
-
-            if (!SplinePointInfo.NextSegmentSplineMeshComponent)
-                break;
-
-            int32 ThisIndex = Index;
-            int32 NextIndex = Index + 1;
-            float DistThis  = GetDistanceAlongSplineAtSplinePoint(ThisIndex);
-            float DistNext  = GetDistanceAlongSplineAtSplinePoint(NextIndex);
-
-            float SegmentLength = DistNext - DistThis;
-            float Offset        = FMath::Min(SplineSegmentOffset, SegmentLength * 0.5f);
-
-            if (Offset * 2.0f >= SegmentLength)
-                continue;
-
-            // float Offset = 0.1f;
-
-            float StartDist = DistThis + Offset;
-            float EndDist   = DistNext - Offset;
-
-            FVector StartPos = GetLocationAtDistanceAlongSpline(StartDist, ESplineCoordinateSpace::World);
-            // FVector StartTangent = GetTangentAtDistanceAlongSpline(StartDist, ESplineCoordinateSpace::World);
-            FVector EndPos = GetLocationAtDistanceAlongSpline(EndDist, ESplineCoordinateSpace::World);
-            // FVector EndTangent   = GetTangentAtDistanceAlongSpline(EndDist, ESplineCoordinateSpace::World);
-            FVector StartTangent = EndPos - StartPos;
-            FVector EndTangent   = StartTangent;
-
-            SplinePointInfo.NextSegmentSplineMeshComponent->SetStartAndEnd(
-                StartPos, StartTangent, EndPos, EndTangent, true);
-
-            if (SplineMesh)
-            {
-                SplinePointInfo.NextSegmentSplineMeshComponent->SetStaticMesh(SplineMesh);
-                // SplinePointInfo.NextSegmentSplineMeshComponent->SetMaterial(0, SplineMesh->GetMaterial(0));
-            }
-        }
-        else
-        {
             if (SplinePointInfo.NextSegmentSplineMeshComponent)
-                SplinePointInfo.NextSegmentSplineMeshComponent->SetStaticMesh(nullptr);
+            {
+                SplinePointInfo.NextSegmentSplineMeshComponent->DestroyComponent();
+                SplinePointInfo.NextSegmentSplineMeshComponent = nullptr;
+            }
+        }
+        return;
+    }
+
+    // Otherwise, construct segments for all points
+    for (int32 Index = 0; Index < SplinePointsInfo.Num(); ++Index)
+        ConstructSplineSegment(Index);
+}
+
+void UPathSplineComponent::ConstructSplineSegment(int32 Index)
+{
+    if (!SplinePointsInfo.IsValidIndex(Index))
+        return;
+
+    // Check if this point or next segment is dirty, if not, skip
+    bool  bIsNextSegmentDirty = false;
+    auto& SplinePointInfo = SplinePointsInfo[Index];
+    if (SplinePointsInfo.IsValidIndex(Index + 1))
+        bIsNextSegmentDirty = SplinePointsInfo[Index + 1].bIsDirty;
+
+    if (!SplinePointInfo.bIsDirty && !bIsNextSegmentDirty)
+        return;
+
+    // Construct PointMeshComponent
+    if (!SplinePointInfo.PointMeshComponent)
+    {
+        SplinePointInfo.PointMeshComponent = NewObject<UStaticMeshComponent>(this);
+        if (!SplinePointInfo.PointMeshComponent)
+            return;
+        SplinePointInfo.PointMeshComponent->SetMobility(EComponentMobility::Movable);
+        SplinePointInfo.PointMeshComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+        SplinePointInfo.PointMeshComponent->RegisterComponent();
+    }
+
+    if (!SplinePointInfo.PointMeshComponent)
+        return;
+
+    // SetStaticMesh and WorldLocation
+    switch (SplinePointInfo.Type)
+    {
+        case ETypeSplinePoint::Start:
+            SplinePointInfo.PointMeshComponent->SetStaticMesh(SplinePointStartMesh);
+            break;
+        case ETypeSplinePoint::Middle:
+            SplinePointInfo.PointMeshComponent->SetStaticMesh(SplinePointMiddleMesh);
+            break;
+        case ETypeSplinePoint::End:
+            SplinePointInfo.PointMeshComponent->SetStaticMesh(SplinePointEndMesh);
+            break;
+        default:
+            SplinePointInfo.PointMeshComponent->SetStaticMesh(nullptr);
+            break;
+    }
+
+    SplinePointInfo.PointMeshComponent->SetWorldLocation(SplinePointInfo.WorldLocation);
+
+    // NextSegmentSplineMeshComponent
+    if (SplinePointInfo.Type != ETypeSplinePoint::End)
+    {
+        // Construct NextSegmentSplineMeshComponent
+        if (!SplinePointInfo.NextSegmentSplineMeshComponent)
+        {
+            SplinePointInfo.NextSegmentSplineMeshComponent = NewObject<USplineMeshComponent>(this);
+            if (!SplinePointInfo.NextSegmentSplineMeshComponent)
+                return;
+
+            SplinePointInfo.NextSegmentSplineMeshComponent->SetMobility(EComponentMobility::Movable);
+            SplinePointInfo.NextSegmentSplineMeshComponent->AttachToComponent(
+                this, FAttachmentTransformRules::KeepRelativeTransform);
+            SplinePointInfo.NextSegmentSplineMeshComponent->RegisterComponent();
         }
 
+        if (!SplinePointInfo.NextSegmentSplineMeshComponent)
+            return;
+
+        // SetStaticMesh and Start/End position & tangent
+        int32 ThisIndex = Index;
+        int32 NextIndex = Index + 1;
+        float DistThis  = GetDistanceAlongSplineAtSplinePoint(ThisIndex);
+        float DistNext  = GetDistanceAlongSplineAtSplinePoint(NextIndex);
+
+        float SegmentLength = DistNext - DistThis;
+        float Offset        = FMath::Min(SplineSegmentOffset, SegmentLength * 0.5f);
+
+        if (Offset * 2.0f >= SegmentLength)
+            return;
+
+        // float Offset = 0.1f;
+
+        float StartDist = DistThis + Offset;
+        float EndDist   = DistNext - Offset;
+
+        FVector StartPos = GetLocationAtDistanceAlongSpline(StartDist, ESplineCoordinateSpace::World);
+        // FVector StartTangent = GetTangentAtDistanceAlongSpline(StartDist, ESplineCoordinateSpace::World);
+        FVector EndPos = GetLocationAtDistanceAlongSpline(EndDist, ESplineCoordinateSpace::World);
+        // FVector EndTangent   = GetTangentAtDistanceAlongSpline(EndDist, ESplineCoordinateSpace::World);
+        FVector StartTangent = EndPos - StartPos;
+        FVector EndTangent   = StartTangent;
+
+        SplinePointInfo.NextSegmentSplineMeshComponent->SetStartAndEnd(
+            StartPos, StartTangent, EndPos, EndTangent, true);
+
+        SplinePointInfo.NextSegmentSplineMeshComponent->SetStaticMesh(SplineMesh);
+    }
+    else
+    {
+        // if last point, clear NextSegmentSplineMeshComponent
+        if (SplinePointInfo.NextSegmentSplineMeshComponent)
+            SplinePointInfo.NextSegmentSplineMeshComponent->SetStaticMesh(nullptr);
     }
 }

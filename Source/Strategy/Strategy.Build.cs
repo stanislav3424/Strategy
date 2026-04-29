@@ -16,7 +16,8 @@ public class Strategy : ModuleRules
             "AIModule",
             "UMG",
             "EnhancedInput",
-            "GameplayTasks"
+            "GameplayTasks",
+            "NavigationSystem"
         });
 
         PublicIncludePaths.AddRange(new string[] { 

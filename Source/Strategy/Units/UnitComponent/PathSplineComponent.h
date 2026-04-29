@@ -32,6 +32,9 @@ struct FSplinePointInfo
     UPROPERTY(BlueprintReadOnly, Category = "Debug")
     class USplineMeshComponent* NextSegmentSplineMeshComponent = nullptr;
 
+    UPROPERTY(BlueprintReadOnly, Category = "Debug")
+    bool bIsDirty = true;
+
     // UPROPERTY(BlueprintReadOnly, Category = "Debug")
     // FRotator Rotation = FRotator::ZeroRotator;
 };
@@ -49,9 +52,16 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+    virtual void TickComponent(
+        float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+    void UpdateOwnerLocation();
     UFUNCTION()
     void         UpdateSplinePointsInfo();
-    void         ConstructSpline();
+    void ConstructSpline();
+
+    void ConstructSplineSegments();
+
+    void ConstructSplineSegment(int32 Index);
 
     UPROPERTY(EditDefaultsOnly, Category = "SplineMesh")
     class UStaticMesh* SplinePointMiddleMesh;

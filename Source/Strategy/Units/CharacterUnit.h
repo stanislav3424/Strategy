@@ -32,4 +32,7 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class UPathSplineComponent* PathSplineComponent;
+
+    //UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    //class UPathDrawingComponent* PathDrawingComponent;
 };
