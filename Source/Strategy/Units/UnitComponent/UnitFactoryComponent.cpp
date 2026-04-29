@@ -7,16 +7,19 @@
 UUnitFactoryComponent::UUnitFactoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+    bUseAttachParentBound             = true;
 
 	SpawnPoint = CreateDefaultSubobject<USphereComponent>(TEXT("SpawnPoint"));
     SpawnPoint->SetupAttachment(this);
     SpawnPoint->SetRelativeLocation(FVector(-100.0f, 0.0f, 0.0f));
     SpawnPoint->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    SpawnPoint->bUseAttachParentBound = true;
 
 	MovePoint = CreateDefaultSubobject<USphereComponent>(TEXT("MovePoint"));
     MovePoint->SetupAttachment(this);
     MovePoint->SetRelativeLocation(FVector(100.0f, 0.0f, 0.0f));
     MovePoint->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    MovePoint->bUseAttachParentBound = true;
 }
 
 void UUnitFactoryComponent::AddQueue(TSubclassOf<AActor> UnitClass)

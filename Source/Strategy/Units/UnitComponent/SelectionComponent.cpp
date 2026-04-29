@@ -10,6 +10,8 @@ USelectionComponent::USelectionComponent()
     SelectionMesh->SetupAttachment(this);
     SelectionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     SelectionMesh->bHiddenInSceneCapture = true;
+    SelectionMesh->bUseAttachParentBound = true;
+    bUseAttachParentBound                = true;
 }
 
 void USelectionComponent::SetSelected(bool bSelected)

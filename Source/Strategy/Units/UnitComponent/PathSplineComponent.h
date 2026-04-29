@@ -56,7 +56,7 @@ protected:
         float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
     void UpdateOwnerLocation();
     UFUNCTION()
-    void         UpdateSplinePointsInfo();
+    void UpdateSplinePointsInfo();
     void ConstructSpline();
 
     void ConstructSplineSegments();

@@ -22,24 +22,33 @@ protected:
     UFUNCTION()
     void UpdatePathPoints();
 
-    UPROPERTY(EditDefaultsOnly, Category = "Path Drawing")
+    void DrawSegment(const FVector& Start, const FVector& End, const FLinearColor& Color) const;
+
+    void DrawTargetMarker(const FVector& Location, const FLinearColor& Color) const;
+
+    UPROPERTY(EditAnywhere, Category = "Path Drawing")
     FLinearColor LineColor = FLinearColor::Green;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Path Drawing")
-    float LineThickness = 50.0f;
+    UPROPERTY(EditAnywhere, Category = "Path Drawing")
+    float PathHalfWidth = 25.0f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Path Drawing")
-    float ArrowSize = 20.0f; 
+    UPROPERTY(EditAnywhere, Category = "Path Drawing")
+    float PathHalfHeight = 10.0f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Path Drawing")
-    float LineLifetime = 0.f; 
+    UPROPERTY(EditAnywhere, Category = "Path Drawing")
+    float TargetMarkerSize = 40.0f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Path Drawing")
-    float PointOffset = 30.0f; 
+    UPROPERTY(EditAnywhere, Category = "Path Drawing")
+    float PointOffset = 30.0f;
+
+    UPROPERTY(EditAnywhere, Category = "Path Drawing")
+    float LineLifetime = 0.0f;
 
 private:
     TArray<FVector> PathPoints;
 
     UPROPERTY()
     class UAICommandQueueComponent* AICommandQueueComponent;
+
+    FVector CachedOwnerLocation;
 };

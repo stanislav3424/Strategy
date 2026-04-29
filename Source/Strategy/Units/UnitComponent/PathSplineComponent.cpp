@@ -12,6 +12,7 @@ UPathSplineComponent::UPathSplineComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
     ClearSplinePoints(true);
+    bUseAttachParentBound = true;
 }
 
 void UPathSplineComponent::BeginPlay()
@@ -199,6 +200,8 @@ void UPathSplineComponent::ConstructSplineSegment(int32 Index)
         SplinePointInfo.PointMeshComponent->SetMobility(EComponentMobility::Movable);
         SplinePointInfo.PointMeshComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
         SplinePointInfo.PointMeshComponent->RegisterComponent();
+        SplinePointInfo.PointMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        SplinePointInfo.PointMeshComponent->bUseAttachParentBound = true;
     }
 
     if (!SplinePointInfo.PointMeshComponent)
@@ -237,6 +240,8 @@ void UPathSplineComponent::ConstructSplineSegment(int32 Index)
             SplinePointInfo.NextSegmentSplineMeshComponent->AttachToComponent(
                 this, FAttachmentTransformRules::KeepRelativeTransform);
             SplinePointInfo.NextSegmentSplineMeshComponent->RegisterComponent();
+            SplinePointInfo.NextSegmentSplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            SplinePointInfo.NextSegmentSplineMeshComponent->bUseAttachParentBound = true;
         }
 
         if (!SplinePointInfo.NextSegmentSplineMeshComponent)
