@@ -15,6 +15,18 @@ class STRATEGY_API UContextWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+    template <typename TypeComponent> static TypeComponent* GetComponent(UObject* ContextObject)
+    {
+        auto Component = Cast<TypeComponent>(ContextObject);
+        if (Component)
+            return Component;
+        auto Actor = Cast<AActor>(ContextObject);
+        if (!Actor)
+            return nullptr;
+        Component = Actor->FindComponentByClass<TypeComponent>();
+        return Component;
+    }
+
     void SetContext(UObject* NewContextObject);
 
 protected:

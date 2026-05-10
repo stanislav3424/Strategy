@@ -9,6 +9,7 @@
 #include "Commands/AICommandQueueComponent.h"
 #include "Commands/CommandTask.h"
 #include "AIController.h"
+#include "NavigationSystem.h"
 
 USelectionControlComponent::USelectionControlComponent()
 {
@@ -173,6 +174,18 @@ void USelectionControlComponent::OnCommand(FInputActionValue const& InputAction)
     PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, HitResult);
     if (!HitResult.bBlockingHit)
         return;
+
+    auto World = GetWorld();
+    if (!World)
+        return;
+
+    auto NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
+    if (NavigationSystem)
+    {
+        FNavLocation ProjectedLocation;
+        if (NavigationSystem->ProjectPointToNavigation(HitResult.Location, ProjectedLocation))
+            HitResult.Location = ProjectedLocation.Location;
+    }
 
     for (auto Actor : SelectedActors)
         if (auto AICommandQueueComponent = UAICommandQueueComponent::GetAICommandQueueComponent(Actor))
