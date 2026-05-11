@@ -14,25 +14,25 @@ class STRATEGY_API ACharacterUnit : public ACharacter
 public:
     ACharacterUnit();
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class USpawnComponent* GetSpawnComponent() const { return SpawnComponent; }
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class UTeamComponent* GetTeamComponent() const { return TeamComponent; }
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class UArmorComponent* GetArmorComponent() const { return ArmorComponent; }
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class UAICommandQueueComponent* GetAICommandQueueComponent() const { return AICommandQueueComponent; }
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class USelectionComponent* GetSelectionComponent() const { return SelectionComponent; }
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class UPathSplineComponent* GetPathSplineComponent() const { return PathSplineComponent; }
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class UStaticMeshComponent* GetSelectionMesh() const { return SelectionMesh; }
 
 protected:

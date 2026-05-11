@@ -17,13 +17,13 @@ class STRATEGY_API AFactoryUnit : public APawnUnit
 public:
     AFactoryUnit();
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class UUnitFactoryComponent* GetUnitFactoryComponent() const { return UnitFactoryComponent; }
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class USphereComponent* GetSpawnPoint() const { return SpawnPoint; }
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "UnitComponent")
     class USphereComponent* GetMovePoint() const { return MovePoint; }
 
 protected:

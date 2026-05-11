@@ -4,6 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "CheckFieldMacros.h"
 #include "CharacterUnit.h"
+#include "PawnUnit.h"
 
 USelectionComponent::USelectionComponent()
 {
@@ -58,14 +59,27 @@ void USelectionComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    auto CharacterUnit = Cast<ACharacterUnit>(GetOwner());
-    CHECK_FIELD_RETURN(LogTemp, CharacterUnit);
+    if (auto CharacterUnit = Cast<ACharacterUnit>(GetOwner()))
+    {
 
-    SelectionMesh = CharacterUnit->GetSelectionMesh();
-    CHECK_FIELD_RETURN(LogTemp, SelectionMesh);
+        SelectionMesh = CharacterUnit->GetSelectionMesh();
+        CHECK_FIELD_RETURN(LogTemp, SelectionMesh);
 
-    SelectionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    SelectionMesh->bHiddenInSceneCapture = true;
+        SelectionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        SelectionMesh->bHiddenInSceneCapture = true;
 
-    SetSelected(false);
+        SetSelected(false);
+    }
+
+    if (auto PawnUnit = Cast<APawnUnit>(GetOwner()))
+    {
+
+        SelectionMesh = PawnUnit->GetSelectionMesh();
+        CHECK_FIELD_RETURN(LogTemp, SelectionMesh);
+
+        SelectionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        SelectionMesh->bHiddenInSceneCapture = true;
+
+        SetSelected(false);
+    }
 }

@@ -12,6 +12,9 @@ void UAICommandQueueComponent::AddTask(TSubclassOf<UCommandTask> TaskClass, clas
 {
     CHECK_FIELD_RETURN(LogTemp, TaskClass);
 
+    if(!IsAvailableTask(TaskClass))
+        return;
+
     UCommandTask* Task = NewObject<UCommandTask>(GetTransientPackage(), TaskClass);
     CHECK_FIELD_RETURN(LogTemp, Task);
 

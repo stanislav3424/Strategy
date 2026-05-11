@@ -20,6 +20,7 @@ APawnUnit::APawnUnit()
 
     SelectionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SelectionMesh"));
     SelectionMesh->SetupAttachment(GetRootComponent());
+    SelectionMesh->bHiddenInSceneCapture = true;
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
