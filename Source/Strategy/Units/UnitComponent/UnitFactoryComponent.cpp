@@ -3,23 +3,13 @@
 #include "UnitFactoryComponent.h"
 #include "Components/SphereComponent.h"
 #include "SpawnComponent.h"
+#include "Units/FactoryUnit.h"
+#include "CheckFieldMacros.h"
 
 UUnitFactoryComponent::UUnitFactoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-    bUseAttachParentBound             = true;
 
-	SpawnPoint = CreateDefaultSubobject<USphereComponent>(TEXT("SpawnPoint"));
-    SpawnPoint->SetupAttachment(this);
-    SpawnPoint->SetRelativeLocation(FVector(-100.0f, 0.0f, 0.0f));
-    SpawnPoint->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    SpawnPoint->bUseAttachParentBound = true;
-
-	MovePoint = CreateDefaultSubobject<USphereComponent>(TEXT("MovePoint"));
-    MovePoint->SetupAttachment(this);
-    MovePoint->SetRelativeLocation(FVector(100.0f, 0.0f, 0.0f));
-    MovePoint->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    MovePoint->bUseAttachParentBound = true;
 }
 
 void UUnitFactoryComponent::AddQueue(TSubclassOf<AActor> UnitClass)
@@ -136,19 +126,12 @@ void UUnitFactoryComponent::BeginPlay()
                      "factory will not be able to spawn this unit."));
         }
     }
-}
 
-void UUnitFactoryComponent::OnRegister()
-{
-    Super::OnRegister();
+    auto FactoryUnit = Cast<AFactoryUnit>(GetOwner());
+    CHECK_FIELD_RETURN(LogTemp, FactoryUnit);
 
-    // Обход бага Template Mismatch:
-    if (SpawnPoint)
-    {
-        SpawnPoint->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-    }
-    if (MovePoint)
-    {
-        MovePoint->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-    }
+    SpawnPoint = FactoryUnit->GetSpawnPoint();
+    CHECK_FIELD(LogTemp, SpawnPoint);
+    MovePoint  = FactoryUnit->GetMovePoint();
+    CHECK_FIELD(LogTemp, MovePoint);
 }

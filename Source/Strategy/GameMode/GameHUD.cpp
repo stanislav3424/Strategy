@@ -44,10 +44,38 @@ void AGameHUD::DrawHUD()
     PlayerController->ProjectWorldLocationToScreen(EndLocation, ScreenEnd);
 
     TArray<AActor*> SelectedActors;
-    GetActorsInSelectionRectangle(ScreenStart, ScreenEnd, SelectedActors, true, false);
+    GetActorsInSelectionRectangle(ScreenStart, ScreenEnd, SelectedActors, false, false);
+
+    for (auto Iterator = SelectedActors.CreateIterator(); Iterator; ++Iterator)
+    {
+        auto Actor = *Iterator;
+        if (!Actor)
+        {
+            Iterator.RemoveCurrent();
+            continue;
+        }
+
+        FVector2D Screen;
+        PlayerController->ProjectWorldLocationToScreen(Actor->GetActorLocation(), Screen);
+
+        if (!IsPointInsideRectangle(Screen, ScreenStart, ScreenEnd))
+        {
+            Iterator.RemoveCurrent();
+        }
+    }
 
     SelectionControlComponent->UpdateSelectionActors(SelectedActors);
 
     // Debug code to draw selection rectangle using HUD's Canvas
     // DrawRect(FLinearColor::Green, ScreenStart.X, ScreenStart.Y, ScreenEnd.X - ScreenStart.X, ScreenEnd.Y - ScreenStart.Y);
+}
+
+bool AGameHUD::IsPointInsideRectangle(const FVector2D& Point, const FVector2D& RectStart, const FVector2D& RectEnd)
+{
+    float MinX = FMath::Min(RectStart.X, RectEnd.X);
+    float MaxX = FMath::Max(RectStart.X, RectEnd.X);
+    float MinY = FMath::Min(RectStart.Y, RectEnd.Y);
+    float MaxY = FMath::Max(RectStart.Y, RectEnd.Y);
+
+    return (Point.X >= MinX && Point.X <= MaxX && Point.Y >= MinY && Point.Y <= MaxY);
 }

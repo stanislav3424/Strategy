@@ -9,10 +9,31 @@
 UCLASS(Blueprintable, Abstract)
 class STRATEGY_API APawnUnit : public APawn
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	APawnUnit();
+    APawnUnit();
+
+    UFUNCTION(BlueprintCallable)
+    class USpawnComponent* GetSpawnComponent() const { return SpawnComponent; }
+
+    UFUNCTION(BlueprintCallable)
+    class UTeamComponent* GetTeamComponent() const { return TeamComponent; }
+
+    UFUNCTION(BlueprintCallable)
+    class UArmorComponent* GetArmorComponent() const { return ArmorComponent; }
+
+    UFUNCTION(BlueprintCallable)
+    class UAICommandQueueComponent* GetAICommandQueueComponent() const { return AICommandQueueComponent; }
+
+    UFUNCTION(BlueprintCallable)
+    class USelectionComponent* GetSelectionComponent() const { return SelectionComponent; }
+
+    UFUNCTION(BlueprintCallable)
+    class UPathSplineComponent* GetPathSplineComponent() const { return PathSplineComponent; }
+
+    UFUNCTION(BlueprintCallable)
+    class UStaticMeshComponent* GetSelectionMesh() const { return SelectionMesh; }
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -29,4 +50,10 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class USelectionComponent* SelectionComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    class UPathSplineComponent* PathSplineComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    class UStaticMeshComponent* SelectionMesh;
 };

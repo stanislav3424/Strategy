@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "IconRenderActor.h"
 #include "IconRenderSubsystem.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnIconReady, UTexture*, Icon, int32, RequestId);
@@ -18,7 +19,6 @@ struct FPendingCallbacks
 
 	UPROPERTY(BlueprintReadOnly, Category = "Debug")
     TMap<int32, FOnIconReady> Callbacks;
-    ;
 };
 
 USTRUCT(BlueprintType)

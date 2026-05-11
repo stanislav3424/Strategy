@@ -12,7 +12,7 @@ UPathSplineComponent::UPathSplineComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
     ClearSplinePoints(true);
-    bUseAttachParentBound = true;
+
 }
 
 void UPathSplineComponent::BeginPlay()

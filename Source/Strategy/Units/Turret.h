@@ -10,11 +10,11 @@
  * 
  */
 UCLASS()
-class STRATEGY_API ATurret : public APawnUnit
+class STRATEGY_API ATurretUnit : public APawnUnit
 {
     GENERATED_BODY()
 
 public:
-    ATurret();
+    ATurretUnit();
 
 };

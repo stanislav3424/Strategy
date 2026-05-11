@@ -3,15 +3,10 @@
 #include "SelectionComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "CheckFieldMacros.h"
+#include "CharacterUnit.h"
 
 USelectionComponent::USelectionComponent()
 {
-    SelectionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SelectionMesh"));
-    SelectionMesh->SetupAttachment(this);
-    SelectionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    SelectionMesh->bHiddenInSceneCapture = true;
-    SelectionMesh->bUseAttachParentBound = true;
-    bUseAttachParentBound                = true;
 }
 
 void USelectionComponent::SetSelected(bool bSelected)
@@ -63,16 +58,14 @@ void USelectionComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    auto CharacterUnit = Cast<ACharacterUnit>(GetOwner());
+    CHECK_FIELD_RETURN(LogTemp, CharacterUnit);
+
+    SelectionMesh = CharacterUnit->GetSelectionMesh();
+    CHECK_FIELD_RETURN(LogTemp, SelectionMesh);
+
+    SelectionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    SelectionMesh->bHiddenInSceneCapture = true;
+
     SetSelected(false);
-}
-
-void USelectionComponent::OnRegister()
-{
-    Super::OnRegister();
-
-    // Обход бага Template Mismatch:
-    if (SelectionMesh)
-    {
-        SelectionMesh->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-    }
 }

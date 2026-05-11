@@ -18,6 +18,8 @@ protected:
     virtual void BeginPlay() override;
     virtual void DrawHUD() override;
 
+    static bool IsPointInsideRectangle(const FVector2D& Point, const FVector2D& RectStart, const FVector2D& RectEnd);
+
 private:
     UPROPERTY(EditDefaultsOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
     TSubclassOf<class UHUDWidget> HUDWidgetClass;

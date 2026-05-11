@@ -4,7 +4,6 @@
 #include "SpawnComponent.h"
 #include "TeamComponent.h"
 #include "ArmorComponent.h"
-#include "Turret.h"
 
 AActorUnit::AActorUnit()
 {

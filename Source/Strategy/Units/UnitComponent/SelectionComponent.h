@@ -3,18 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SceneComponent.h"
+#include "Components/ActorComponent.h"
 #include "SelectionComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, bool, bIsSelected);
 
 UCLASS(ClassGroup = (UnitComponent))
-class STRATEGY_API USelectionComponent : public USceneComponent
+class STRATEGY_API USelectionComponent : public UActorComponent
 {
     GENERATED_BODY()
 
 public:
     USelectionComponent();
+
     void SetSelected(bool bSelected);
     bool IsSelected() const { return bIsSelected; }
 
@@ -32,12 +33,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-    virtual void OnRegister() override;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Instanced, Category = "Unit Factory")
-    class UStaticMeshComponent* SelectionMesh;
 
 private:
+    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
+    class UStaticMeshComponent* SelectionMesh;
+
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
     bool bIsSelected = true;
 };

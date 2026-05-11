@@ -8,6 +8,7 @@
 #include "Units/UnitComponent/SelectionComponent.h"
 #include "Units/UnitComponent/PathSplineComponent.h"
 #include "Units/UnitComponent/PathDrawingComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 ACharacterUnit::ACharacterUnit()
 {
@@ -15,9 +16,7 @@ ACharacterUnit::ACharacterUnit()
     TeamComponent           = CreateDefaultSubobject<UTeamComponent>(TEXT("TeamComponent"));
     ArmorComponent          = CreateDefaultSubobject<UArmorComponent>(TEXT("ArmorComponent"));
     AICommandQueueComponent = CreateDefaultSubobject<UAICommandQueueComponent>(TEXT("AICommandQueueComponent"));
-
-    SelectionComponent = CreateDefaultSubobject<USelectionComponent>(TEXT("SelectionComponent"));
-    SelectionComponent->SetupAttachment(GetRootComponent());
+    SelectionComponent      = CreateDefaultSubobject<USelectionComponent>(TEXT("SelectionComponent"));
 
     PathSplineComponent = CreateDefaultSubobject<UPathSplineComponent>(TEXT("PathSplineComponent"));
     PathSplineComponent->SetupAttachment(GetRootComponent());
@@ -25,7 +24,8 @@ ACharacterUnit::ACharacterUnit()
     PathSplineComponent->SetUsingAbsoluteRotation(true);
     PathSplineComponent->SetUsingAbsoluteScale(true);
 
-    //PathDrawingComponent = CreateDefaultSubobject<UPathDrawingComponent>(TEXT("PathDrawingComponent"));
+    SelectionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SelectionMesh"));
+    SelectionMesh->SetupAttachment(GetRootComponent());
 
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }

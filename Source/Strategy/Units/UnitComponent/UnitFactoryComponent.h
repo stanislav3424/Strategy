@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SceneComponent.h"
+#include "Components/ActorComponent.h"
 #include "UnitFactoryComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQueueChanged);
 
 UCLASS(ClassGroup = (UnitComponent))
-class STRATEGY_API UUnitFactoryComponent : public USceneComponent
+class STRATEGY_API UUnitFactoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -32,22 +32,21 @@ public:
 
 protected:
     virtual void BeginPlay() override;
-    virtual void OnRegister() override;
 
 	UFUNCTION(BlueprintCallable)
     TArray<TSubclassOf<AActor>> const& GetQueue() const { return QueueSpawnUnitClasses; }
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,  Instanced, Category = "Unit Factory")
-    class USphereComponent* SpawnPoint;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly,  Instanced, Category = "Unit Factory")
-    class USphereComponent* MovePoint;
 
 	UPROPERTY(BlueprintAssignable)
     FOnQueueChanged OnQueueChanged;
 
 private:
     void CheckQueue();
+
+	UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
+    class USphereComponent* SpawnPoint;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
+    class USphereComponent* MovePoint;
 
     UPROPERTY(BlueprintReadOnly, Category = "Debug", meta = (AllowPrivateAccess = "true"))
     TArray<TSubclassOf<AActor>> CanSpawnUnitClasses;
